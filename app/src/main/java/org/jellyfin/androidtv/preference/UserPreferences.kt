@@ -3,14 +3,13 @@ package org.jellyfin.androidtv.preference
 import android.content.Context
 import android.view.KeyEvent
 import androidx.preference.PreferenceManager
-import org.jellyfin.androidtv.preference.UserPreferences.Companion.screensaverInAppEnabled
 import org.jellyfin.androidtv.preference.constant.AppTheme
 import org.jellyfin.androidtv.preference.constant.AudioBehavior
 import org.jellyfin.androidtv.preference.constant.ClockBehavior
 import org.jellyfin.androidtv.preference.constant.NextUpBehavior
 import org.jellyfin.androidtv.preference.constant.RatingType
+import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.preference.constant.RefreshRateSwitchingBehavior
-import org.jellyfin.androidtv.preference.constant.StillWatchingBehavior
 import org.jellyfin.androidtv.preference.constant.WatchedIndicatorBehavior
 import org.jellyfin.androidtv.preference.constant.ZoomMode
 import org.jellyfin.androidtv.ui.playback.segment.MediaSegmentAction
@@ -34,17 +33,47 @@ import kotlin.time.Duration.Companion.minutes
 class UserPreferences(context: Context) : SharedPreferenceStore(
 	sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 ) {
-	companion object {
+
+    companion object {
 		/* Display */
+        /**
+         * Always show white borders around cards when focused
+         */
+        const val showWhiteBorders = true
+        /**
+         * Image quality preference: low, normal, high
+         */
+		var imageQuality = stringPreference("image_quality", "low")
 		/**
 		 * Select the app theme
 		 */
-		var appTheme = enumPreference("app_theme", AppTheme.DARK)
+		var appTheme = enumPreference("app_theme", AppTheme.FLEXY)
 
 		/**
 		 * Enable background images while browsing
 		 */
 		var backdropEnabled = booleanPreference("pref_show_backdrop", true)
+
+        /**
+         * Backdrop blur intensity from 0.0 (no blur) to 1.0 (full blur)
+         */
+        var backdropBlurIntensity = floatPreference("pref_backdrop_blur_intensity", 0.0f)
+
+		/**
+		 * Backdrop dimming intensity from 0 (no dimming) to 1.0 (full black)
+		 */
+		var backdropDimmingIntensity = floatPreference("pref_backdrop_dimming_intensity", 0.1f)
+
+		/**
+		 * Backdrop fading intensity from 0 (no fade) to 1.0 (full fade)
+		 */
+		var backdropFadingIntensity = floatPreference("pref_backdrop_fading_intensity", 0.7f)
+
+		/**
+		 * Card size for home screen and library browsing
+		 * Values: "small", "medium", "large"
+		 */
+		var cardSize = stringPreference("card_size", "small")
 
 		/**
 		 * Show premieres on home screen
@@ -88,11 +117,6 @@ class UserPreferences(context: Context) : SharedPreferenceStore(
 		 */
 		var cinemaModeEnabled = booleanPreference("pref_enable_cinema_mode", true)
 
-		/**
-		 * Enable still watching
-		 */
-		var stillWatchingBehavior = enumPreference("enable_still_watching", StillWatchingBehavior.DISABLED)
-
 		/* Playback - Video */
 		/**
 		 * Whether to use an external playback application or not.
@@ -125,11 +149,21 @@ class UserPreferences(context: Context) : SharedPreferenceStore(
 		 */
 		var ac3Enabled = booleanPreference("pref_bitstream_ac3", true)
 
+		/**
+		 * Enable libass.
+		 */
+		var assDirectPlay = booleanPreference("libass_enabled", true)
+
+		/**
+		 * Enable PGS subtitle direct-play.
+		 */
+		var pgsDirectPlay = booleanPreference("pgs_enabled", true)
+
 		/* Live TV */
 		/**
 		 * Use direct play
 		 */
-		var liveTvDirectPlayEnabled = booleanPreference("pref_live_direct", true)
+		var liveTvDirectPlayEnabled = booleanPreference("pref_live_direct", false)
 
 		/**
 		 * Shortcut used for changing the audio track
@@ -178,11 +212,6 @@ class UserPreferences(context: Context) : SharedPreferenceStore(
 		var subtitlesBackgroundColor = longPreference("subtitles_background_color", 0x00FFFFFF)
 
 		/**
-		 * Subtitles bold text
-		 */
-		var subtitlesTextWeight = intPreference("subtitles_text_weight", 400)
-
-		/**
 		 * Subtitles foreground color
 		 */
 		var subtitlesTextColor = longPreference("subtitles_text_color", 0xFFFFFFFF)
@@ -197,9 +226,16 @@ class UserPreferences(context: Context) : SharedPreferenceStore(
 		 */
 		var subtitlesTextSize = floatPreference("subtitles_text_size", 1f)
 
-		/**
-		 * Show screensaver in app
-		 */
+
+        /**
+         * Subtitles bold text
+         */
+        var subtitlesTextWeightValue = intPreference("subtitles_text_weight_value", 400)
+
+
+    /**
+     * Show screensaver in app
+     */
 		var screensaverInAppEnabled = booleanPreference("screensaver_inapp_enabled", true)
 
 		/**
@@ -210,7 +246,7 @@ class UserPreferences(context: Context) : SharedPreferenceStore(
 		/**
 		 * Age rating used to filter items in the screensaver. Use -1 to disable (omits parameter from requests).
 		 */
-		var screensaverAgeRatingMax = intPreference("screensaver_agerating_max", 13)
+		var screensaverAgeRatingMax = intPreference("screensaver_agerating_max", -1)
 
 		/**
 		 * Whether items shown in the screensaver are required to have an age rating set.
@@ -244,15 +280,16 @@ class UserPreferences(context: Context) : SharedPreferenceStore(
 		var trickPlayEnabled = booleanPreference("trick_play_enabled", false)
 
 		/**
-		 * Enable libass.
+		 * Enable preloading of images for better performance
 		 */
-		var assDirectPlay = booleanPreference("libass_enabled", false)
+		var preloadImages = booleanPreference("preload_images", true)
 
-		/**
-  		 * Enable PGS subtitle direct-play.
-		 */
-		var pgsDirectPlay = booleanPreference("pgs_enabled", true)
-	}
+        /**
+         * Default audio language preference (empty string means use best guess)
+         * Values are ISO 639-2 language codes
+         */
+        var defaultAudioLanguage = stringPreference("default_audio_language", "")
+    }
 
 	init {
 		// Note: Create a single migration per app version
