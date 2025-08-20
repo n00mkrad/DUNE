@@ -77,7 +77,9 @@ abstract class BrowseFolderFragment : BrowseSupportFragment(), RowLoader {
 	protected abstract suspend fun setupQueries(rowLoader: RowLoader)
 
 	override fun loadRows(rows: MutableList<BrowseRowDef>) {
-		val mutableAdapter = MutableObjectAdapter<Row>(PositionableListRowPresenter()).also {
+		val mutableAdapter = MutableObjectAdapter<Row>(
+			PositionableListRowPresenter(requireContext())
+		).also {
 			adapter = it
 		}
 

@@ -161,6 +161,7 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
 
         sortOptions = new HashMap<>();
         {
+            // Main sort options
             sortOptions.put(0, new SortOption(getString(R.string.lbl_name), ItemSortBy.SORT_NAME, SortOrder.ASCENDING));
             sortOptions.put(1, new SortOption(getString(R.string.lbl_date_added), ItemSortBy.DATE_CREATED, SortOrder.DESCENDING));
             sortOptions.put(2, new SortOption(getString(R.string.lbl_premier_date), ItemSortBy.PREMIERE_DATE, SortOrder.DESCENDING));
@@ -174,9 +175,20 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
                 sortOptions.put(6, new SortOption(getString(R.string.lbl_last_played), ItemSortBy.DATE_PLAYED, SortOrder.DESCENDING));
             }
 
+            // New sort by options
+            sortOptions.put(7, new SortOption(getString(R.string.lbl_random), ItemSortBy.RANDOM, SortOrder.ASCENDING));
+
             if (mFolder.getCollectionType() != null && mFolder.getCollectionType() == CollectionType.MOVIES) {
-                sortOptions.put(7, new SortOption(getString(R.string.lbl_runtime), ItemSortBy.RUNTIME, SortOrder.ASCENDING));
+                sortOptions.put(8, new SortOption(getString(R.string.lbl_runtime), ItemSortBy.RUNTIME, SortOrder.ASCENDING));
             }
+
+            // Add Production Year sort option
+            sortOptions.put(9, new SortOption(getString(R.string.lbl_production_year), ItemSortBy.PRODUCTION_YEAR, SortOrder.DESCENDING));
+
+            // Add Sort Order category
+            sortOptions.put(100, new SortOption("Sort Order", null, null));
+            sortOptions.put(101, new SortOption("Ascending", null, SortOrder.ASCENDING));
+            sortOptions.put(102, new SortOption("Descending", null, SortOrder.DESCENDING));
         }
 
         setDefaultGridRowCols(mPosterSizeSetting, mImageType);
@@ -208,14 +220,24 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        // Clear the background when fragment is paused
+        backgroundService.getValue().clearBackgrounds();
+        // Clear any pending callbacks
+        mHandler.removeCallbacksAndMessages(null);
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
-
         binding = null;
         mGridView = null;
     }
 
     private void createGrid() {
+        if (mGridPresenter == null) return;
+
         mGridViewHolder = mGridPresenter.onCreateViewHolder(binding.rowsFragment);
         if (mGridViewHolder instanceof HorizontalGridPresenter.ViewHolder) {
             mGridView = ((HorizontalGridPresenter.ViewHolder) mGridViewHolder).getGridView();
@@ -238,7 +260,7 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
     }
 
     private void updateAdapter() {
-        if (mGridView != null) {
+        if (mGridView != null && mAdapter != null) {
             mGridPresenter.onBindViewHolder(mGridViewHolder, mAdapter);
             if (mSelectedPosition != -1) {
                 mGridView.setSelectedPosition(mSelectedPosition);
@@ -272,9 +294,13 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
 
 
     public void setItem(BaseRowItem item) {
+        if (binding == null) {
+            // Binding is not available, view is likely destroyed
+            return;
+        }
         if (item != null) {
             binding.title.setText(item.getFullName(requireContext()));
-            InfoLayoutHelper.addInfoRow(requireContext(), item.getBaseItem(), binding.infoRow, true);
+            InfoLayoutHelper.addInfoRow(requireContext(), item.getBaseItem(), binding.infoRow, true, false);
         } else {
             binding.title.setText("");
             binding.infoRow.removeAllViews();
@@ -296,30 +322,45 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
     private Map<Integer, SortOption> sortOptions;
 
     private SortOption getSortOption(ItemSortBy value) {
+        if (value == null) {
+            // Return a default sort option if the value is null
+            return new SortOption(getString(R.string.lbl_bracket_unknown), ItemSortBy.SORT_NAME, SortOrder.ASCENDING);
+        }
+
         for (SortOption sortOption : sortOptions.values()) {
-            if (sortOption.value.equals(value)) return sortOption;
+            if (sortOption.value != null && sortOption.value.equals(value)) {
+                return sortOption;
+            }
         }
 
         return new SortOption(getString(R.string.lbl_bracket_unknown), ItemSortBy.SORT_NAME, SortOrder.ASCENDING);
     }
 
     public void setStatusText(String folderName) {
-        String text = getString(R.string.lbl_showing) + " ";
-        FilterOptions filters = mAdapter.getFilters();
-        if (filters == null || (!filters.isFavoriteOnly() && !filters.isUnwatchedOnly())) {
-            text += getString(R.string.lbl_all_items);
-        } else {
-            text += (filters.isUnwatchedOnly() ? getString(R.string.lbl_unwatched) : "") + " " +
-                    (filters.isFavoriteOnly() ? getString(R.string.lbl_favorites) : "");
+        if (folderName == null || binding == null || mAdapter == null) return;
+
+        try {
+            String text = getString(R.string.lbl_showing) + " ";
+            FilterOptions filters = mAdapter.getFilters();
+            if (filters == null || (!filters.isFavoriteOnly() && !filters.isUnwatchedOnly())) {
+                text += getString(R.string.lbl_all_items);
+            } else {
+                text += (filters.isUnwatchedOnly() ? getString(R.string.lbl_unwatched) : "") + " " +
+                        (filters.isFavoriteOnly() ? getString(R.string.lbl_favorites) : "");
+            }
+
+            if (mAdapter.getStartLetter() != null) {
+                text += " " + getString(R.string.lbl_starting_with) + " " + mAdapter.getStartLetter();
+            }
+
+            text += " " + getString(R.string.lbl_from) + " '" + folderName + "' " + getString(R.string.lbl_sorted_by) + " " + getSortOption(mAdapter.getSortBy()).name;
+
+            if (binding.statusText != null) {
+                binding.statusText.setText(text);
+            }
+        } catch (Exception e) {
+            Timber.e(e, "Error setting status text");
         }
-
-        if (mAdapter.getStartLetter() != null) {
-            text += " " + getString(R.string.lbl_starting_with) + " " + mAdapter.getStartLetter();
-        }
-
-        text += " " + getString(R.string.lbl_from) + " '" + folderName + "' " + getString(R.string.lbl_sorted_by) + " " + getSortOption(mAdapter.getSortBy()).name;
-
-        binding.statusText.setText(text);
     }
 
     final private OnItemViewSelectedListener mRowSelectedListener =
@@ -327,23 +368,29 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
                 @Override
                 public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
                                            RowPresenter.ViewHolder rowViewHolder, Row row) {
-                    int position = mGridView.getSelectedPosition();
-                    Timber.d("row selected position %s", position);
-                    if (position != mSelectedPosition) {
-                        mSelectedPosition = position;
-                    }
-                    // Update the counter
-                    updateCounter(position + 1);
-                    if (position >= 0) {
-                        mSelectedListener.onItemSelected(itemViewHolder, item, rowViewHolder, row);
+                    try {
+                        int position = mGridView != null ? mGridView.getSelectedPosition() : -1;
+                        Timber.d("row selected position %s", position);
+                        if (position != mSelectedPosition) {
+                            mSelectedPosition = position;
+                        }
+                        // Update the counter
+                        updateCounter(position + 1);
+                        if (position >= 0 && mSelectedListener != null) {
+                            mSelectedListener.onItemSelected(itemViewHolder, item, rowViewHolder, row);
+                        }
+                    } catch (Exception e) {
+                        Timber.e(e, "Error in row selected listener");
                     }
                 }
             };
 
     public void updateCounter(int position) {
-        if (mAdapter != null) {
-            binding.counter.setText(MessageFormat.format("{0} | {1}", position, mAdapter.getTotalItems()));
+        if (binding == null || mAdapter == null) {
+            // Binding or adapter not available, view is likely destroyed
+            return;
         }
+        binding.counter.setText(MessageFormat.format("{0} | {1}", position, mAdapter.getTotalItems()));
     }
 
     private void setRowDef(final BrowseRowDef rowDef) {
@@ -571,7 +618,6 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
 
         if (mImageType != imageType || mPosterSizeSetting != posterSizeSetting || mGridDirection != gridDirection || mDirty) {
             determiningPosterSize = true;
-
             mImageType = imageType;
             mPosterSizeSetting = posterSizeSetting;
             mGridDirection = gridDirection;
@@ -616,10 +662,10 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
         // adapt chunk size if needed
         int chunkSize = mRowDef.getChunkSize();
         if (mCardsScreenEst > 0 && mCardsScreenEst >= chunkSize) {
-            chunkSize = Math.min(mCardsScreenEst + mCardsScreenStride, 150); // cap at 150
+            chunkSize = Math.min(mCardsScreenEst + mCardsScreenStride, 100); // cap at 150
             Timber.d("buildAdapter adjusting chunkSize to <%s> screenEst <%s>", chunkSize, mCardsScreenEst);
         }
-        chunkSize=100;
+        chunkSize=50;
 
         switch (mRowDef.getQueryType()) {
             case NextUp:
@@ -667,7 +713,8 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
                     setItem(null);
                     updateCounter(mAdapter.getTotalItems() > 0 ? 1 : 0);
                 }
-                mLetterButton.setVisibility(ItemSortBy.SORT_NAME.equals(mAdapter.getSortBy()) ? View.VISIBLE : View.GONE);
+                // Always show the letter button regardless of sort order
+                mLetterButton.setVisibility(View.VISIBLE);
                 if (mAdapter.getItemsLoaded() == 0) {
                     mGridView.setFocusable(false);
                     mHandler.postDelayed(() -> {
@@ -713,31 +760,65 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
     }
 
     private void addTools() {
-        //Add tools
-        int size = Utils.convertDpToPixel(requireContext(), 26);
+        //Add tools - Increased icon size by 5% (27.3dp rounded to 27)
+        int size = Utils.convertDpToPixel(requireContext(), 27);
 
         mSortButton = new ImageButton(requireContext(), null, 0, R.style.Button_Icon);
         mSortButton.setImageResource(R.drawable.ic_sort);
         mSortButton.setMaxHeight(size);
         mSortButton.setAdjustViewBounds(true);
+        // Removed scaling as we're setting the exact size
         mSortButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //Create sort menu
                 PopupMenu sortMenu = new PopupMenu(getActivity(), binding.toolBar, Gravity.END);
+                // Add sort options
                 for (Map.Entry<Integer, SortOption> entry : sortOptions.entrySet()) {
-                    MenuItem item = sortMenu.getMenu().add(0, entry.getKey(), entry.getKey(), entry.getValue().name);
-                    item.setChecked(entry.getValue().value.equals(libraryPreferences.get(LibraryPreferences.Companion.getSortBy())));
+                    SortOption option = entry.getValue();
+                    if (option.value != null) {
+                        // This is a sort by option (Name, Date Added, etc.)
+                        MenuItem menuItem = sortMenu.getMenu().add(0, entry.getKey(), entry.getKey(), option.name);
+                        menuItem.setChecked(option.value != null && option.value.equals(mAdapter.getSortBy()) &&
+                            option.order != null && option.order.equals(mAdapter.getSortOrder()));
+                    } else if (option.order != null) {
+                        // This is a sort order option (Ascending/Descending)
+                        MenuItem menuItem = sortMenu.getMenu().add(1, entry.getKey(), entry.getKey(), option.name);
+                        menuItem.setChecked(option.order.equals(mAdapter.getSortOrder()));
+                    } else {
+                        // This is a category header (Sort Order)
+                        sortMenu.getMenu().add(2, entry.getKey(), entry.getKey(), option.name);
+                    }
                 }
+
+                // Make sort options checkable
                 sortMenu.getMenu().setGroupCheckable(0, true, true);
+                sortMenu.getMenu().setGroupCheckable(1, true, true);
+                sortMenu.getMenu().setGroupEnabled(2, false); // Disable category header
+
                 sortMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        mAdapter.setSortBy(Objects.requireNonNull(sortOptions.get(item.getItemId())));
-                        mAdapter.Retrieve();
-                        item.setChecked(true);
-                        updateDisplayPrefs();
-                        return true;
+                        SortOption selectedOption = sortOptions.get(item.getItemId());
+                        if (selectedOption != null) {
+                            if (selectedOption.value != null) {
+                                // This is a sort by option
+                                mAdapter.setSortBy(selectedOption);
+                            } else if (selectedOption.order != null) {
+                                // This is a sort order option
+                                SortOption currentSort = getSortOption(mAdapter.getSortBy());
+                                SortOption newSort = new SortOption(
+                                    currentSort.name,
+                                    currentSort.value,
+                                    selectedOption.order
+                                );
+                                mAdapter.setSortBy(newSort);
+                            }
+                            mAdapter.Retrieve();
+                            updateDisplayPrefs();
+                            return true;
+                        }
+                        return false;
                     }
                 });
                 sortMenu.show();
@@ -753,6 +834,7 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
             mUnwatchedButton.setActivated(mAdapter.getFilters().isUnwatchedOnly());
             mUnwatchedButton.setMaxHeight(size);
             mUnwatchedButton.setAdjustViewBounds(true);
+            // Removed scaling as we're setting the exact size
             mUnwatchedButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -775,6 +857,7 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
         mFavoriteButton.setActivated(mAdapter.getFilters().isFavoriteOnly());
         mFavoriteButton.setMaxHeight(size);
         mFavoriteButton.setAdjustViewBounds(true);
+        // Removed scaling as we're setting the exact size
         mFavoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -796,6 +879,7 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
         mLetterButton.setImageResource(R.drawable.ic_jump_letter);
         mLetterButton.setMaxHeight(size);
         mLetterButton.setAdjustViewBounds(true);
+        // Removed scaling as we're setting the exact size
         mLetterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -810,6 +894,7 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
         mSettingsButton.setImageResource(R.drawable.ic_settings);
         mSettingsButton.setMaxHeight(size);
         mSettingsButton.setAdjustViewBounds(true);
+        // Removed scaling as we're setting the exact size
         mSettingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -907,7 +992,11 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
         public void run() {
             if (!getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) return;
 
-            backgroundService.getValue().setBackground(mCurrentItem.getBaseItem());
+            // Don't set background in grid browse views (both horizontal and vertical)
+            if (!(mGridPresenter instanceof HorizontalGridPresenter) &&
+                !(mGridPresenter instanceof VerticalGridPresenter)) {
+                backgroundService.getValue().setBackground(mCurrentItem.getBaseItem());
+            }
             setItem(mCurrentItem);
         }
     };
