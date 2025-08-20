@@ -2,6 +2,8 @@ package org.jellyfin.androidtv.ui.itemdetail;
 
 import static org.koin.java.KoinJavaComponent.inject;
 
+import org.koin.java.KoinJavaComponent;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Point;
@@ -89,6 +91,7 @@ import org.jellyfin.sdk.model.api.PersonKind;
 import org.jellyfin.sdk.model.api.SeriesTimerInfoDto;
 import org.jellyfin.sdk.model.api.UserDto;
 import org.jellyfin.sdk.model.serializer.UUIDSerializerKt;
+import org.koin.java.KoinJavaComponent;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -313,7 +316,7 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
                 MyDetailsOverviewRowPresenter.ViewHolder viewholder = mDorPresenter.getViewHolder();
                 if (viewholder == null) return;
 
-                if (mBaseItem != null && ((mBaseItem.getRunTimeTicks() != null && mBaseItem.getRunTimeTicks() > 0) || mBaseItem.getRunTimeTicks() != null)) {
+                if (mBaseItem != null && mBaseItem.getRunTimeTicks() != null && mBaseItem.getRunTimeTicks() > 0) {
                     viewholder.setInfoValue3(getEndTime());
                     mLoopHandler.postDelayed(this, 15000);
                 }
@@ -485,6 +488,19 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
         if (!getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) return;
 
         mBaseItem = item;
+        // Fetch image quality preference
+        UserPreferences userPreferences = KoinJavaComponent.get(UserPreferences.class);
+        String imageQuality = userPreferences.get(UserPreferences.Companion.getImageQuality());
+        int bgWidth = 1280; // default for 'normal'
+        int bgHeight = 720;
+        if ("low".equals(imageQuality)) {
+            bgWidth = 640;
+            bgHeight = 360;
+        } else if ("high".equals(imageQuality)) {
+            bgWidth = 1920;
+            bgHeight = 1080;
+        }
+        // Revert: Only use original item-based background
         backgroundService.getValue().setBackground(item);
         if (mBaseItem != null) {
             if (mChannelId != null) {
@@ -783,15 +799,56 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
                     play(mBaseItem, 0, false);
                 }
             });
+
             mDetailsOverviewRow.addAction(playButton);
 
-            if (isSeries && !isStarted) {
-                FullDetailsFragmentHelperKt.getNextUpEpisode(this, nextUpEpisode -> {
-                    handleResumeButtonAndFocus(nextUpEpisode);
-                    return null;
-                });
+            // Add External Player button
+            if (BaseItemExtensionsKt.canPlay(mBaseItem) && mBaseItem.getMediaSources() != null && !mBaseItem.getMediaSources().isEmpty()) {
+                TextUnderButton externalPlayerButton = TextUnderButton.create(requireContext(), 
+                    R.drawable.ic_external_player, buttonSize, 2, 
+                    getString(R.string.lbl_play_external), new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // Create a list with just the current item to pass to the player
+                            List<BaseItemDto> items = new ArrayList<>();
+                            items.add(mBaseItem);
+                            // Set external player preference
+                            Timber.d("Preparing to play item in external player");
+                            UserPreferences prefs = userPreferences.getValue();
+                            boolean originalPref = prefs.get(UserPreferences.Companion.getUseExternalPlayer());
+                            prefs.set(UserPreferences.Companion.getUseExternalPlayer(), true);
+                            try {
+                                // Check if there are any items to play
+                                if (items == null || items.isEmpty()) {
+                                    Timber.e("No items to play in external player");
+                                    Utils.showToast(requireContext(), getString(R.string.msg_no_playable_items));
+                                    return;
+                                }
+                                
+                                // Log the item being played
+                                BaseItemDto item = items.get(0);
+                                Timber.d("Attempting to play item in external player: %s (ID: %s, Type: %s)", 
+                                    item.getName(), item.getId(), item.getType());
+                                
+                                play(items, 0, false);
+                                Timber.d("Successfully launched external player");
+                            } catch (Exception e) {
+                                Timber.e(e, "Error launching external player");
+                                Utils.showToast(requireContext(), getString(R.string.msg_external_player_error));
+                            } finally {
+                                // Restore original preference
+                                prefs.set(UserPreferences.Companion.getUseExternalPlayer(), originalPref);
+                                Timber.d("Restored external player preference to: %b", originalPref);
+                            }
+                        }
+                    });
+                mDetailsOverviewRow.addAction(externalPlayerButton);
+            }
+
+            if (resumeButtonVisible) {
+                mResumeButton.requestFocus();
             } else {
-                handleResumeButtonAndFocus(null);
+                playButton.requestFocus();
             }
 
             boolean isMusic = baseItem.getType() == BaseItemKind.MUSIC_ALBUM
@@ -1064,24 +1121,6 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
             showMoreButtonIfNeeded();  //Episodes check for previous and then call this above
     }
 
-    private void handleResumeButtonAndFocus(BaseItemDto nextUpEpisode) {
-        boolean isSeries = mBaseItem.getType() == BaseItemKind.SERIES;
-        boolean isFinished = mBaseItem.getUserData().getPlayed();
-        boolean isStarted = mBaseItem.getUserData().getPlayedPercentage() != null && mBaseItem.getUserData().getPlayedPercentage() > 0;
-        if (!isStarted && nextUpEpisode != null) {
-            isStarted = nextUpEpisode.getUserData().getPlaybackPositionTicks() > 0;
-        }
-
-        boolean resumeButtonVisible = (isSeries && isStarted && !isFinished) || (JavaCompat.getCanResume(mBaseItem));
-        mResumeButton.setVisibility(resumeButtonVisible ? View.VISIBLE : View.GONE);
-
-        if (resumeButtonVisible) {
-            mResumeButton.requestFocus();
-        } else {
-            playButton.requestFocus();
-        }
-    }
-
     private void addVersionsMenu(View v) {
         PopupMenu menu = new PopupMenu(requireContext(), v, Gravity.END);
 
@@ -1218,7 +1257,6 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
                     return;
                 }
 
-                interactionTracker.getValue().notifyStartSession(item, response);
                 KoinJavaComponent.<PlaybackLauncher>get(PlaybackLauncher.class).launch(getContext(), response, pos, false, 0, shuffle);
             }
         });
