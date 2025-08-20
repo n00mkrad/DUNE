@@ -4,9 +4,10 @@
         <bitmap
             android:src="@drawable/app_logo"
             android:gravity="center"
-            android:width="280dp"
-            android:height="140dp"
             android:antialias="true"
-            android:filter="true" />
+            android:filter="true"
+            android:width="120dp"
+            android:height="68dp"
+            android:scaleType="fitCenter" />
     </item>
 </layer-list>
