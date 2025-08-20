@@ -51,7 +51,6 @@ private val isQ = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q // API 29
 private val isR = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R // API 30
 private val isS = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S // API 31
 private val isUpsideDownCake = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE // API 34
-private val isBaklava = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA // API 36
 
 fun createDeviceProfileReport(
 	context: Context,
@@ -59,9 +58,9 @@ fun createDeviceProfileReport(
 ) = buildMarkdown {
 	// Header
 	appendLine("---")
-	appendLine("client: Jellyfin for Android TV")
+	appendLine("client: Dune for Android TV")
 	appendLine("client_version: ${BuildConfig.VERSION_NAME}")
-	appendLine("client_repository: https://github.com/jellyfin/jellyfin-androidtv")
+	appendLine("client_repository: https://github.com/Sam42a/DUNE")
 	appendLine("type: media_capabilities_report")
 	appendLine("format: markdown")
 	appendLine("---")
@@ -193,7 +192,6 @@ fun createDeviceProfileReport(
 
 		// Refresh rate and timing
 		appendItem("Refresh rate") { appendValue(display.refreshRate.toString()) }
-		if (isBaklava) appendItem("Adaptive refresh rate") { appendValue(display.hasArrSupport().toString()) }
 		appendItem("VSYNC offset") { appendValue(display.appVsyncOffsetNanos.nanoseconds.toString()) }
 		appendItem("Presentation deadline") { appendValue(display.presentationDeadlineNanos.nanoseconds.toString()) }
 		if (isR) appendItem("Minimal post processing") { appendValue(display.isMinimalPostProcessingSupported.toString()) }
@@ -213,15 +211,6 @@ fun createDeviceProfileReport(
 				appendLine("- HDR10: ${supportedHdrTypes.contains(Display.HdrCapabilities.HDR_TYPE_HDR10)}")
 				if (isQ) appendLine("- HDR10+: ${supportedHdrTypes.contains(Display.HdrCapabilities.HDR_TYPE_HDR10_PLUS)}")
 				appendLine("- HLG: ${supportedHdrTypes.contains(Display.HdrCapabilities.HDR_TYPE_HLG)}")
-			}
-		}
-
-		if (isUpsideDownCake) appendItem("HDR/SDR ratio") {
-			appendLine()
-			appendItem("Available") { appendValue(display.isHdrSdrRatioAvailable.toString()) }
-			appendItem("Ratio") { appendValue(display.hdrSdrRatio.toString()) }
-			if (isBaklava) {
-				appendItem("Highest ratio") { appendValue(display.highestHdrSdrRatio.toString()) }
 			}
 		}
 	}
