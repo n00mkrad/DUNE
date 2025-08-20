@@ -65,6 +65,9 @@ class UserLoginFragment : Fragment() {
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 
+		// Prevent background override for login screen
+		backgroundService.preventLoginBackgroundOverride()
+
 		userLoginViewModel.clearLoginState()
 
 		// Open initial fragment
@@ -93,6 +96,9 @@ class UserLoginFragment : Fragment() {
 
 	override fun onDestroyView() {
 		super.onDestroyView()
+
+		// Allow background override again
+		backgroundService.allowLoginBackgroundOverride()
 
 		_binding = null
 	}
