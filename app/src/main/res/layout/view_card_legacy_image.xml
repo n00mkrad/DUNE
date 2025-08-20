@@ -20,24 +20,21 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:duplicateParentState="true"
-        android:foreground="@drawable/ripple"
-        android:gravity="start"
-        android:visibility="gone"
-        tools:ignore="UnusedAttribute"
-        tools:visibility="visible">
+        android:clipToOutline="true"
+        android:clipChildren="true">
 
         <!-- Crossfading is broken with this specific layout, especially when using thumbnails -->
         <org.jellyfin.androidtv.ui.AsyncImageView
             android:id="@+id/main_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/shape_card_image_background"
+            android:background="@null"
             android:contentDescription="@null"
             android:scaleType="centerCrop"
+            android:clipToOutline="true"
+            android:elevation="0dp"
             app:crossfadeDuration="0"
-            lb:layout_viewType="main"
-            tools:src="@drawable/app_logo" />
+            lb:layout_viewType="main" />
 
         <ImageView
             android:id="@+id/favIcon"
@@ -95,8 +92,8 @@
 
         <FrameLayout
             android:id="@+id/watchedIndicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:layout_alignEnd="@id/main_image"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="4dp"
@@ -107,26 +104,32 @@
                 android:id="@+id/watched"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
+                android:layout_gravity="center"
                 android:contentDescription="@null"
-                android:src="@drawable/circle_accent"
+                android:src="@drawable/squared_accent"
                 tools:ignore="ImageContrastCheck" />
 
             <TextView
+                android:shadowColor="#1A000000"
+                android:shadowDx="0"
+                android:shadowDy="2"
+                android:shadowRadius="4"
                 android:id="@+id/unwatchedCount"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:contentDescription="@string/lbl_unwatched"
                 android:textAlignment="center"
-                android:textSize="10sp"
+                android:textSize="9sp"
+                android:gravity="center"
                 tools:ignore="TextContrastCheck"
                 tools:text="5"
                 android:visibility="invisible" />
 
             <ImageView
                 android:id="@+id/checkMark"
-                android:layout_width="14dp"
-                android:layout_height="14dp"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_watch"
                 android:contentDescription="@null"
@@ -141,7 +144,7 @@
             android:layout_alignStart="@id/main_image"
             android:layout_alignEnd="@id/main_image"
             android:layout_alignBottom="@id/main_image"
-            android:background="@color/black_transparent_light"
+            android:background="#1A1A1A"
             android:padding="4dp"
             android:visibility="gone"
             tools:visibility="visible">
@@ -180,9 +183,11 @@
 
     </RelativeLayout>
 
-    <androidx.leanback.widget.NonOverlappingFrameLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         lb:layout_viewType="info">
 
         <RelativeLayout
@@ -264,6 +269,6 @@
 
         </RelativeLayout>
 
-    </androidx.leanback.widget.NonOverlappingFrameLayout>
+    </FrameLayout>
 
 </merge>
