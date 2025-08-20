@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <set
+            android:ordering="together">
+            <!-- Simplified focus transition to improve performance -->
+            <objectAnimator
+                android:duration="0"
+                android:propertyName="scaleX"
+                android:valueTo="0.0"
+                android:valueType="floatType"
+                android:interpolator="@android:interpolator/linear" />
+            <objectAnimator
+                android:duration="0"
+                android:propertyName="scaleY"
+                android:valueTo="0.0"
+                android:valueType="floatType"
+                android:interpolator="@android:interpolator/linear" />
+        </set>
+    </item>
+    <item>
+        <set
+            android:ordering="together">
+            <!-- Simplified focus transition to improve performance -->
+            <objectAnimator
+                android:duration="0"
+                android:propertyName="scaleX"
+                android:valueTo="0.0"
+                android:valueType="floatType"
+                android:interpolator="@android:interpolator/linear" />
+            <objectAnimator
+                android:duration="0"
+                android:propertyName="scaleY"
+                android:valueTo="0.0"
+                android:valueType="floatType"
+                android:interpolator="@android:interpolator/linear" />
+        </set>
+    </item>
+</selector>
