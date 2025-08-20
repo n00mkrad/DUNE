@@ -1,5 +1,7 @@
 package org.jellyfin.androidtv.ui.preference.screen
 
+import org.jellyfin.androidtv.ui.preference.dsl.subtitlePreview
+
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import org.jellyfin.androidtv.R
@@ -8,7 +10,6 @@ import org.jellyfin.androidtv.preference.UserSettingPreferences
 import org.jellyfin.androidtv.preference.constant.AudioBehavior
 import org.jellyfin.androidtv.preference.constant.NEXTUP_TIMER_DISABLED
 import org.jellyfin.androidtv.preference.constant.NextUpBehavior
-import org.jellyfin.androidtv.preference.constant.StillWatchingBehavior
 import org.jellyfin.androidtv.ui.playback.segment.MediaSegmentAction
 import org.jellyfin.androidtv.ui.playback.segment.MediaSegmentRepository
 import org.jellyfin.androidtv.ui.preference.custom.DurationSeekBarPreference
@@ -16,6 +17,7 @@ import org.jellyfin.androidtv.ui.preference.dsl.OptionsFragment
 import org.jellyfin.androidtv.ui.preference.dsl.checkbox
 import org.jellyfin.androidtv.ui.preference.dsl.colorList
 import org.jellyfin.androidtv.ui.preference.dsl.enum
+import org.jellyfin.androidtv.ui.preference.dsl.list
 import org.jellyfin.androidtv.ui.preference.dsl.link
 import org.jellyfin.androidtv.ui.preference.dsl.optionsScreen
 import org.jellyfin.androidtv.ui.preference.dsl.seekbar
@@ -64,12 +66,6 @@ class PlaybackPreferencesScreen : OptionsFragment() {
 				}
 			}
 
-			enum<StillWatchingBehavior> {
-				setTitle(R.string.pref_still_watching_behavior_title)
-				bind(userPreferences, UserPreferences.stillWatchingBehavior)
-				depends { userPreferences[UserPreferences.mediaQueuingEnabled] }
-			}
-
 			checkbox {
 				setTitle(R.string.lbl_enable_cinema_mode)
 				setContent(R.string.sum_enable_cinema_mode)
@@ -86,7 +82,7 @@ class PlaybackPreferencesScreen : OptionsFragment() {
 				valueFormatter = object : DurationSeekBarPreference.ValueFormatter() {
 					override fun display(value: Int) = "${value / 1000}s"
 				}
-				bind(userSettingPreferences, UserSettingPreferences.skipForwardLength)
+				bind(userSettingPreferences, userSettingPreferences.skipForwardLength)
 			}
 		}
 
@@ -97,10 +93,53 @@ class PlaybackPreferencesScreen : OptionsFragment() {
 				setTitle(R.string.lbl_audio_output)
 				bind(userPreferences, UserPreferences.audioBehaviour)
 			}
+
+			// Audio language preference
+			list {
+				setTitle(R.string.pref_audio_default_language)
+				// Set the entries for the list in alphabetical order by display name
+				entries = mapOf(
+					"" to getString(R.string.pref_default_language_none),
+					"ara" to getString(R.string.pref_default_language_ara),
+					"zho" to getString(R.string.pref_default_language_zho),
+					"ces" to getString(R.string.pref_default_language_ces),
+					"dan" to getString(R.string.pref_default_language_dan),
+					"nld" to getString(R.string.pref_default_language_nld),
+					"eng" to getString(R.string.pref_default_language_eng),
+					"fin" to getString(R.string.pref_default_language_fin),
+					"fra" to getString(R.string.pref_default_language_fra),
+					"deu" to getString(R.string.pref_default_language_deu),
+					"ell" to getString(R.string.pref_default_language_ell),
+					"heb" to getString(R.string.pref_default_language_heb),
+					"hin" to getString(R.string.pref_default_language_hin),
+					"hun" to getString(R.string.pref_default_language_hun),
+					"ind" to getString(R.string.pref_default_language_ind),
+					"ita" to getString(R.string.pref_default_language_ita),
+					"jpn" to getString(R.string.pref_default_language_jpn),
+					"kor" to getString(R.string.pref_default_language_kor),
+					"msa" to getString(R.string.pref_default_language_msa),
+					"nor" to getString(R.string.pref_default_language_nor),
+					"pol" to getString(R.string.pref_default_language_pol),
+					"por" to getString(R.string.pref_default_language_por),
+					"ron" to getString(R.string.pref_default_language_ron),
+					"rus" to getString(R.string.pref_default_language_rus),
+					"slk" to getString(R.string.pref_default_language_slk),
+					"spa" to getString(R.string.pref_default_language_spa),
+					"swe" to getString(R.string.pref_default_language_swe),
+					"tha" to getString(R.string.pref_default_language_tha),
+					"tur" to getString(R.string.pref_default_language_tur),
+					"ukr" to getString(R.string.pref_default_language_ukr),
+					"vie" to getString(R.string.pref_default_language_vie)
+				)
+				// Bind to the preference store
+				bind(userPreferences, UserPreferences.defaultAudioLanguage)
+			}
 		}
 
 		category {
 			setTitle(R.string.pref_subtitles)
+			subtitlePreview {}
+
 
 			@Suppress("MagicNumber")
 			colorList {
@@ -188,6 +227,19 @@ class PlaybackPreferencesScreen : OptionsFragment() {
 				}
 			}
 
+
+
+			checkbox {
+				setTitle(R.string.pref_subtitles_bold)
+				bind {
+					val boldWeight = 700
+					val normalWeight = 400
+					get { userPreferences[UserPreferences.subtitlesTextWeightValue] == boldWeight }
+					set { checked -> userPreferences[UserPreferences.subtitlesTextWeightValue] = if (checked) boldWeight else normalWeight }
+					default { false }
+				}
+			}
+
 			colorList {
 				setTitle(R.string.lbl_subtitle_text_stroke_color)
 				entries = mapOf(
@@ -216,7 +268,7 @@ class PlaybackPreferencesScreen : OptionsFragment() {
 				setTitle(R.string.pref_subtitles_size)
 				min = 25 // 0.25f
 				max = 250 // 2.5f
-				increment = 5 // 0.05f
+				increment = 25 // 0.25f
 				valueFormatter = object : DurationSeekBarPreference.ValueFormatter() {
 					override fun display(value: Int): String = "$value%"
 				}
@@ -225,17 +277,6 @@ class PlaybackPreferencesScreen : OptionsFragment() {
 					get { (userPreferences[UserPreferences.subtitlesTextSize] * 100f).roundToInt() }
 					set { value -> userPreferences[UserPreferences.subtitlesTextSize] = value / 100f }
 					default { (UserPreferences.subtitlesTextSize.defaultValue * 100f).roundToInt() }
-				}
-			}
-
-			checkbox {
-				setTitle(R.string.pref_subtitles_bold)
-				bind {
-					val boldWeight = 700
-					val normalWeight = UserPreferences.subtitlesTextWeight.defaultValue
-					get { userPreferences[UserPreferences.subtitlesTextWeight] == boldWeight }
-					set { checked -> userPreferences[UserPreferences.subtitlesTextWeight] = if (checked) boldWeight else normalWeight }
-					default { false }
 				}
 			}
 		}
@@ -274,3 +315,4 @@ class PlaybackPreferencesScreen : OptionsFragment() {
 		}
 	}
 }
+

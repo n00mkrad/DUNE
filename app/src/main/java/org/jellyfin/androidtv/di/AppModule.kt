@@ -2,12 +2,13 @@ package org.jellyfin.androidtv.di
 
 import android.content.Context
 import android.os.Build
-import androidx.lifecycle.ProcessLifecycleOwner
 import coil3.ImageLoader
+import coil3.disk.DiskCache
+import okio.Path.Companion.toOkioPath
+import java.io.File
 import coil3.annotation.ExperimentalCoilApi
 import coil3.gif.AnimatedImageDecoder
 import coil3.gif.GifDecoder
-import coil3.network.NetworkFetcher
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.serviceLoaderEnabled
 import coil3.svg.SvgDecoder
@@ -28,7 +29,7 @@ import org.jellyfin.androidtv.data.repository.UserViewsRepository
 import org.jellyfin.androidtv.data.repository.UserViewsRepositoryImpl
 import org.jellyfin.androidtv.data.service.BackgroundService
 import org.jellyfin.androidtv.integration.dream.DreamViewModel
-import org.jellyfin.androidtv.ui.InteractionTrackerViewModel
+import org.jellyfin.androidtv.ui.ScreensaverViewModel
 import org.jellyfin.androidtv.ui.itemhandling.ItemLauncher
 import org.jellyfin.androidtv.ui.navigation.Destinations
 import org.jellyfin.androidtv.ui.navigation.NavigationRepository
@@ -38,7 +39,6 @@ import org.jellyfin.androidtv.ui.playback.PlaybackControllerContainer
 import org.jellyfin.androidtv.ui.playback.nextup.NextUpViewModel
 import org.jellyfin.androidtv.ui.playback.segment.MediaSegmentRepository
 import org.jellyfin.androidtv.ui.playback.segment.MediaSegmentRepositoryImpl
-import org.jellyfin.androidtv.ui.playback.stillwatching.StillWatchingViewModel
 import org.jellyfin.androidtv.ui.search.SearchFragmentDelegate
 import org.jellyfin.androidtv.ui.search.SearchRepository
 import org.jellyfin.androidtv.ui.search.SearchRepositoryImpl
@@ -55,7 +55,6 @@ import org.jellyfin.androidtv.util.coil.createCoilConnectivityChecker
 import org.jellyfin.androidtv.util.sdk.SdkPlaybackHelper
 import org.jellyfin.sdk.android.androidDevice
 import org.jellyfin.sdk.api.client.HttpClientOptions
-import org.jellyfin.sdk.api.okhttp.OkHttpFactory
 import org.jellyfin.sdk.createJellyfin
 import org.jellyfin.sdk.model.ClientInfo
 import org.koin.android.ext.koin.androidContext
@@ -67,28 +66,23 @@ import org.jellyfin.sdk.Jellyfin as JellyfinSdk
 val defaultDeviceInfo = named("defaultDeviceInfo")
 
 val appModule = module {
-	// SDK
+	// Online Subtitles dependencies
+	// to be added later
+
+
+	// New SDK
 	single(defaultDeviceInfo) { androidDevice(get()) }
-	single { OkHttpFactory() }
 	single { HttpClientOptions() }
 	single {
 		createJellyfin {
 			context = androidContext()
 
 			// Add client info
-			val clientName = buildString {
-				append("Jellyfin Android TV")
-				if (BuildConfig.DEBUG) append(" (debug)")
-			}
-			clientInfo = ClientInfo(clientName, BuildConfig.VERSION_NAME)
+			clientInfo = ClientInfo("Dune Android TV", BuildConfig.VERSION_NAME)
 			deviceInfo = get(defaultDeviceInfo)
 
 			// Change server version
 			minimumServerVersion = ServerRepository.minimumServerVersion
-
-			// Use our own shared factory instance
-			apiClientFactory = get<OkHttpFactory>()
-			socketConnectionFactory = get<OkHttpFactory>()
 		}
 	}
 
@@ -97,27 +91,42 @@ val appModule = module {
 		get<JellyfinSdk>().createApi(httpClientOptions = get<HttpClientOptions>())
 	}
 
-	single { SocketHandler(get(), get(), get(), get(), get(), get(), get(), get(), get(), ProcessLifecycleOwner.get().lifecycle) }
+	single { SocketHandler(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 
 	// Coil (images)
 	single {
-		val okHttpFactory = get<OkHttpFactory>()
-		val httpClientOptions = get<HttpClientOptions>()
+		val context = androidContext()
+		// Set fixed memory cache size to 700MB (700 * 1024 * 1024 bytes)
+		val memoryCacheSize = 700L * 1024 * 1024
+		// Set disk cache size to 1GB (1024 * 1024 * 1024 bytes)
+		val diskCacheSize = 1024L * 1024 * 1024
 
-		@OptIn(ExperimentalCoilApi::class)
-		OkHttpNetworkFetcherFactory(
-			callFactory = { okHttpFactory.createClient(httpClientOptions) },
-			connectivityChecker = ::createCoilConnectivityChecker,
-		)
-	}
+		// Configure disk cache
+		val diskCacheDir = File(context.cacheDir, "image_cache")
+		diskCacheDir.mkdirs()
+		val diskCache = coil3.disk.DiskCache.Builder()
+			.directory(diskCacheDir.toOkioPath())
+			.maxSizeBytes(1024L * 1024 * 1024) // 1GB
+			.build()
 
-	single {
-		ImageLoader.Builder(androidContext()).apply {
+		ImageLoader.Builder(context).apply {
 			serviceLoaderEnabled(false)
 			logger(CoilTimberLogger(if (BuildConfig.DEBUG) Logger.Level.Warn else Logger.Level.Error))
 
+			// Configure memory cache
+			memoryCache {
+				coil3.memory.MemoryCache.Builder()
+					.maxSizeBytes(memoryCacheSize)
+					.build()
+			}
+
+			// Set disk cache
+			diskCache(diskCache)
+
+			// Coil 3.x configuration
 			components {
-				add(get<NetworkFetcher.Factory>())
+				@OptIn(ExperimentalCoilApi::class)
+				add(OkHttpNetworkFetcherFactory(connectivityChecker = ::createCoilConnectivityChecker))
 
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) add(AnimatedImageDecoder.Factory())
 				else add(GifDecoder.Factory())
@@ -129,7 +138,6 @@ val appModule = module {
 	// Non API related
 	single { DataRefreshService() }
 	single { PlaybackControllerContainer() }
-	single { InteractionTrackerViewModel(get(), get()) }
 
 	single<UserRepository> { UserRepositoryImpl() }
 	single<UserViewsRepository> { UserViewsRepositoryImpl(get()) }
@@ -144,8 +152,8 @@ val appModule = module {
 	viewModel { UserLoginViewModel(get(), get(), get(), get(defaultDeviceInfo)) }
 	viewModel { ServerAddViewModel(get()) }
 	viewModel { NextUpViewModel(get(), get(), get()) }
-	viewModel { StillWatchingViewModel(get(), get(), get()) }
 	viewModel { PictureViewerViewModel(get()) }
+	viewModel { ScreensaverViewModel(get()) }
 	viewModel { SearchViewModel(get()) }
 	viewModel { DreamViewModel(get(), get(), get(), get(), get()) }
 
