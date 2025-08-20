@@ -12,33 +12,28 @@ buildscript {
 
 java {
 	toolchain {
-		languageVersion.set(JavaLanguageVersion.of(libs.versions.java.jdk.get()))
-	}
-}
-
-detekt {
-	buildUponDefaultConfig = true
-	ignoreFailures = true
-	config.setFrom(files("$rootDir/detekt.yaml"))
-	basePath = rootDir.absolutePath
-	parallel = true
-
-	source.setFrom(fileTree(projectDir) {
-		include("**/*.kt", "**/*.kts")
-	})
-}
-
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt> {
-	reports {
-		sarif.required.set(true)
+		languageVersion.set(JavaLanguageVersion.of(21))
 	}
 }
 
 subprojects {
+	// Configure linting
+	apply<io.gitlab.arturbosch.detekt.DetektPlugin>()
+	detekt {
+		buildUponDefaultConfig = true
+		ignoreFailures = true
+		config = files("$rootDir/detekt.yaml")
+		basePath = rootDir.absolutePath
+
+		reports {
+			sarif.enabled = true
+		}
+	}
+
 	// Configure default Kotlin compiler options
 	tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile> {
-		compilerOptions {
-			jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+		kotlinOptions {
+			jvmTarget = JavaVersion.VERSION_1_8.toString()
 		}
 	}
 

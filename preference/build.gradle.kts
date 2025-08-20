@@ -1,6 +1,7 @@
 plugins {
 	id("com.android.library")
 	kotlin("android")
+	alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -13,6 +14,7 @@ android {
 
 	buildFeatures {
 		viewBinding = true
+		compose = true
 	}
 
 	lint {
@@ -31,6 +33,15 @@ dependencies {
 
 	// Logging
 	implementation(libs.timber)
+
+	// Compose
+	implementation(libs.bundles.androidx.compose)
+	implementation("androidx.compose.ui:ui")
+	implementation("androidx.compose.ui:ui-tooling-preview")
+	implementation("androidx.compose.material:material:1.5.0")
+	implementation("androidx.compose.material:material-icons-core:1.5.0")
+	implementation("androidx.compose.material:material-icons-extended:1.5.0")
+	debugImplementation("androidx.compose.ui:ui-tooling")
 
 	// Testing
 	testImplementation(libs.kotest.runner.junit5)
