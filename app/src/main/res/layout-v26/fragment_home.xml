@@ -46,6 +46,7 @@
         android:lineSpacingExtra="2sp"
         android:maxLines="1"
         android:text=""
+        android:textAllCaps="false"
         android:textColor="@color/basic_button_text"
         android:textSize="22sp"
         android:textStyle="bold"
