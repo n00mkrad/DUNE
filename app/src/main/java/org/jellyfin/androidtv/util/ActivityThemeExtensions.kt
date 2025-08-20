@@ -14,9 +14,15 @@ import timber.log.Timber
  */
 private val AppTheme.style
 	get() = when (this) {
+		AppTheme.PURPLE_HAZE -> R.style.Theme_Jellyfin_PurpleHaze
 		AppTheme.DARK -> R.style.Theme_Jellyfin
 		AppTheme.EMERALD -> R.style.Theme_Jellyfin_Emerald
 		AppTheme.MUTED_PURPLE -> R.style.Theme_Jellyfin_MutedPurple
+		AppTheme.BASIC -> R.style.Theme_Basic
+		AppTheme.FLEXY -> R.style.Theme_Jellyfin_Flexy
+		AppTheme.YELLOW_TOWN -> R.style.Theme_YellowTown
+		AppTheme.DARK_PURPLE -> R.style.Theme_Jellyfin_DarkPurple
+
 	}
 
 /**
@@ -32,19 +38,26 @@ class ThemeViewModel : ViewModel() {
  * Do not call during resume if the activity may not be recreated (like in the video player).
  */
 fun FragmentActivity.applyTheme() {
-	val viewModel by viewModels<ThemeViewModel>()
-	val userPreferences by inject<UserPreferences>()
-	val theme = userPreferences[UserPreferences.appTheme]
+    val viewModel by viewModels<ThemeViewModel>()
+    val userPreferences by inject<UserPreferences>()
+    val newTheme = userPreferences[UserPreferences.appTheme]
 
-	if (viewModel.theme != theme) {
-		if (viewModel.theme != null) {
-			Timber.i("Recreating activity to apply theme")
-			viewModel.theme = null
-			recreate()
-		} else {
-			Timber.i("Applying theme $theme")
-			viewModel.theme = theme
-			setTheme(theme.style)
-		}
-	}
+    // Always set the theme, but only recreate if it's changed
+    if (newTheme != viewModel.theme) {
+        Timber.i("Theme changed from ${viewModel.theme} to $newTheme, applying...")
+        viewModel.theme = newTheme
+        setTheme(newTheme.style)
+
+        // Only recreate if we're not in the middle of creating the activity
+        if (!isFinishing && !isDestroyed) {
+            window.decorView.post {
+                if (!isFinishing && !isDestroyed) {
+                    recreate()
+                }
+            }
+        }
+    } else {
+        // Just apply the theme without recreation if it's already set
+        setTheme(newTheme.style)
+    }
 }
