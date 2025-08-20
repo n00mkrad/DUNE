@@ -1,12 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Splash screen theme -->
+    <style name="Theme.Jellyfin.Splash" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
 
     <style name="DatePickerCustom">
         <item name="android:datePickerMode">spinner</item>
     </style>
 
     <style name="Widget.Jellyfin.Row.Header" parent="Widget.Leanback.Row.Header">
-        <item name="android:textColor">?attr/headerTextColor</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+    <style name="Text.Secondary">
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <style name="Text.StrokedWhite">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:shadowColor">@android:color/black</item>
+        <item name="android:shadowRadius">1.5</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
     </style>
 
     <style name="player_progress" parent="android:Widget.ProgressBar.Horizontal">
@@ -21,27 +40,30 @@
         <item name="android:maxHeight">5sp</item>
     </style>
 
-    <style name="WindowAnimation"></style>
-
-    <style name="WindowAnimation.SlideTop">
-        <item name="android:windowEnterAnimation">@anim/abc_slide_in_top</item>
-        <item name="android:windowExitAnimation">@anim/abc_slide_out_top</item>
+    <style name="WindowAnimation">
+        <item name="android:windowEnterAnimation">@null</item>
+        <item name="android:windowExitAnimation">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
     </style>
 
-    <style name="WindowAnimation.SlideRight">
-        <item name="android:windowEnterAnimation">@anim/slide_right_in</item>
-        <item name="android:windowExitAnimation">@anim/slide_right_out</item>
+    <style name="WindowAnimation.SlideTop" parent="WindowAnimation"/>
+    <style name="WindowAnimation.SlideRight" parent="WindowAnimation"/>
+    <style name="WindowAnimation.Fade" parent="WindowAnimation"/>
+
+    <style name="CenteredInputMethod" parent="@android:style/Widget.EditText">
+        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center</item>
     </style>
 
-    <style name="WindowAnimation.Fade">
-        <item name="android:windowEnterAnimation">@anim/fade_in</item>
-        <item name="android:windowExitAnimation">@anim/fade_out</item>
+    <style name="CircularProfileImage">
+        <item name="android:background">@drawable/circular_profile_border</item>
+        <item name="android:clipToOutline">true</item>
     </style>
 
     <style name="Button.Default" parent="android:Widget.Button">
         <item name="android:background">@drawable/button_default_back</item>
         <item name="android:foreground">@drawable/button_default_ripple</item>
-        <item name="android:textColor">@drawable/button_default_text</item>
+        <item name="android:textColor">@color/button_text</item>
         <item name="drawableTint">@drawable/button_icon_tint</item>
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingBottom">8dp</item>
@@ -71,12 +93,49 @@
     <style name="Input.Default" parent="android:Widget.EditText">
         <item name="android:background">@drawable/input_default_back</item>
         <item name="android:foreground">@drawable/input_default_ripple</item>
-        <item name="android:textColor">@drawable/input_default_text</item>
-        <item name="android:textColorHint">@drawable/input_default_text</item>
+        <item name="android:textColor">@color/input_text</item>
+        <item name="android:textColorHint">@color/input_hint</item>
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingBottom">8dp</item>
         <item name="android:paddingStart">8dp</item>
         <item name="android:paddingEnd">8dp</item>
+    </style>
+
+    <style name="Input.BlackWithWhiteBorder" parent="Input.Default">
+        <item name="android:background">@drawable/input_black_white_border</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColorHint">@android:color/darker_gray</item>
+    </style>
+
+    <!-- Preference Category Style -->
+    <style name="Preference.Category">
+        <item name="android:layout_marginStart">24dp</item>
+        <item name="android:layout_marginEnd">24dp</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/spanish_blue</item>
+        <item name="android:background">@null</item>
+        <item name="android:divider">@null</item>
+        <item name="android:dividerHeight">0dp</item>
+    </style>
+
+    <!-- Consistent card style for dark theme -->
+    <style name="Card.Dark">
+        <item name="android:background">@drawable/card_dark_bg</item>
+        <item name="android:radius">12dp</item>
+        <item name="android:elevation">4dp</item>
+    </style>
+
+    <!-- Popup style for dark theme -->
+    <style name="Popup.Dark">
+        <item name="android:background">@drawable/popup_dark_rounded</item>
+        <item name="android:elevation">8dp</item>
+        <item name="android:radius">16dp</item>
     </style>
 
     <style name="PopupMenu" parent="android:Widget.Material.PopupMenu">
@@ -87,5 +146,77 @@
     <style name="PopupWindow" parent="android:Widget.Material.PopupWindow">
         <item name="android:popupBackground">@drawable/popup_menu_back</item>
         <item name="android:textColor">@color/indigo_dye</item>
+    </style>
+    <!-- Fallback styles for legacy references -->
+    <style name="Card">
+    <!-- Add any Card base styles here if needed -->
+</style>
+    <style name="Popup">
+    <!-- Add any Popup base styles here if needed -->
+</style>
+    <!-- Exit Confirmation Dialog Style -->
+    <style name="ExitDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/exit_dialog_background</item>
+        <item name="android:windowMinWidthMajor">@dimen/exit_dialog_min_width</item>
+        <item name="android:windowMinWidthMinor">@dimen/exit_dialog_min_width</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="buttonBarButtonStyle">@style/ExitDialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/ExitDialogButton.Negative</item>
+        <item name="buttonBarPositiveButtonStyle">@style/ExitDialogButton.Positive</item>
+        <item name="buttonBarStyle">@style/ExitDialogButtonBar</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineSpacingMultiplier">1.0</item>
+        <item name="android:windowBackground">@drawable/exit_dialog_background</item>
+    </style>
+    
+    <style name="ExitDialogButtonBar" parent="Widget.AppCompat.ButtonBar.AlertDialog">
+        <item name="android:divider">@null</item>
+        <item name="android:dividerHeight">0dp</item>
+        <item name="android:showDividers">none</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:layout_margin">0dp</item>
+        <item name="android:paddingHorizontal">8dp</item>
+    </style>
+    
+    <style name="ExitDialogButton" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:background">@drawable/exit_dialog_button_background</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:minHeight">36dp</item>
+        <item name="android:minWidth">72dp</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:letterSpacing">0.01</item>
+        <item name="android:gravity">center</item>
+    </style>
+    
+    <style name="ExitDialogButton.Negative" parent="ExitDialogButton">
+        <item name="android:textColor">#CCCCCC</item>
+    </style>
+    
+    <style name="ExitDialogButton.Positive" parent="ExitDialogButton">
+        <item name="android:textColor">@color/theme_accent</item>
+    </style>
+
+    <style name="Text">
+    <!-- Add any Text base styles here if needed -->
+</style>
+    <!-- Custom banner style for Android TV -->
+    <style name="CustomBannerStyle">
+        <item name="android:height">100dp</item>
+        <item name="android:width">200dp</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:adjustViewBounds">true</item>
     </style>
 </resources>

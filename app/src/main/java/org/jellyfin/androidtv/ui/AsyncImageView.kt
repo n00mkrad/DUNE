@@ -17,11 +17,11 @@ import coil3.request.target
 import coil3.request.transformations
 import coil3.transform.CircleCropTransformation
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.util.BlurHashDecoder
+import org.jellyfin.androidtv.util.applyQualityOptimizations
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.math.round
@@ -40,7 +40,6 @@ class AsyncImageView @JvmOverloads constructor(
 	private val lifeCycleOwner get() = findViewTreeLifecycleOwner()
 	private val styledAttributes = context.obtainStyledAttributes(attrs, R.styleable.AsyncImageView, defStyleAttr, 0)
 	private val imageLoader by inject<ImageLoader>()
-	private var loadJob: Job? = null
 
 	/**
 	 * The duration of the crossfade when changing switching the images of the url, blurhash and
@@ -66,10 +65,7 @@ class AsyncImageView @JvmOverloads constructor(
 		aspectRatio: Double = 1.0,
 		blurHashResolution: Int = 32,
 	) = doOnAttach {
-		// Cancel the previous load if still running
-		loadJob?.cancel()
-
-		loadJob = lifeCycleOwner?.lifecycleScope?.launch(Dispatchers.IO) {
+		lifeCycleOwner?.lifecycleScope?.launch(Dispatchers.IO) {
 			var placeholderOrBlurHash = placeholder
 
 			// Only show blurhash if an image is going to be loaded from the network
@@ -83,14 +79,15 @@ class AsyncImageView @JvmOverloads constructor(
 			}
 
 			// Start loading image or placeholder
-			val request = if (url == null) {
-				ImageRequest.Builder(context).apply {
+			if (url == null) {
+				imageLoader.enqueue(ImageRequest.Builder(context).apply {
 					target(this@AsyncImageView)
 					data(placeholder)
 					if (circleCrop) transformations(CircleCropTransformation())
-				}.build()
+					applyQualityOptimizations()
+				}.build())
 			} else {
-				ImageRequest.Builder(context).apply {
+				imageLoader.enqueue(ImageRequest.Builder(context).apply {
 					val crossFadeDurationMs = crossFadeDuration.inWholeMilliseconds.toInt()
 					if (crossFadeDurationMs > 0) crossfade(crossFadeDurationMs)
 					else crossfade(false)
@@ -100,10 +97,9 @@ class AsyncImageView @JvmOverloads constructor(
 					placeholder(placeholderOrBlurHash?.asImage())
 					if (circleCrop) transformations(CircleCropTransformation())
 					error(placeholder?.asImage())
-				}.build()
+					applyQualityOptimizations()
+				}.build())
 			}
-
-			imageLoader.enqueue(request).job.await()
 		}
 	}
 }
