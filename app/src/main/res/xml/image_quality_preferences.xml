@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:key="image_quality"
+        android:title="Image Quality"
+        android:summary="Choose the quality of images displayed in the app."
+        android:entries="@array/image_quality_entries"
+        android:entryValues="@array/image_quality_values"
+        android:defaultValue="normal" />
+</PreferenceScreen>
