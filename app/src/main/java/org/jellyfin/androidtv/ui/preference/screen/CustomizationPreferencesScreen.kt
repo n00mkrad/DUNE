@@ -3,7 +3,8 @@ package org.jellyfin.androidtv.ui.preference.screen
 import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.preference.UserPreferences
 import org.jellyfin.androidtv.preference.constant.AppTheme
-import org.jellyfin.androidtv.preference.constant.ClockBehavior
+import org.koin.android.ext.android.inject
+
 import org.jellyfin.androidtv.preference.constant.RatingType
 import org.jellyfin.androidtv.preference.constant.WatchedIndicatorBehavior
 import org.jellyfin.androidtv.ui.preference.dsl.OptionsFragment
@@ -14,7 +15,6 @@ import org.jellyfin.androidtv.ui.preference.dsl.list
 import org.jellyfin.androidtv.ui.preference.dsl.optionsScreen
 import org.jellyfin.androidtv.ui.preference.dsl.shortcut
 import org.jellyfin.androidtv.util.getQuantityString
-import org.koin.android.ext.android.inject
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
@@ -24,35 +24,21 @@ class CustomizationPreferencesScreen : OptionsFragment() {
 	override val screen by optionsScreen {
 		setTitle(R.string.pref_customization)
 
+		link {
+			setTitle(R.string.enhanced_tweaks)
+			setContent(R.string.enhanced_tweaks_description)
+			icon = R.drawable.ic_enhanced
+			withFragment<EnhancedTweaksPreferencesScreen>()
+		}
+
 		category {
-			setTitle(R.string.pref_theme)
-
-			enum<AppTheme> {
-				setTitle(R.string.pref_app_theme)
-				bind(userPreferences, UserPreferences.appTheme)
-			}
-
-			enum<ClockBehavior> {
-				setTitle(R.string.pref_clock_display)
-				bind(userPreferences, UserPreferences.clockBehavior)
-			}
 
 			enum<WatchedIndicatorBehavior> {
 				setTitle(R.string.pref_watched_indicator)
 				bind(userPreferences, UserPreferences.watchedIndicatorBehavior)
 			}
 
-			checkbox {
-				setTitle(R.string.lbl_show_backdrop)
-				setContent(R.string.pref_show_backdrop_description)
-				bind(userPreferences, UserPreferences.backdropEnabled)
-			}
 
-			checkbox {
-				setTitle(R.string.lbl_use_series_thumbnails)
-				setContent(R.string.lbl_use_series_thumbnails_description)
-				bind(userPreferences, UserPreferences.seriesThumbnailsEnabled)
-			}
 
 			enum<RatingType> {
 				setTitle(R.string.pref_default_rating)
@@ -78,14 +64,14 @@ class CustomizationPreferencesScreen : OptionsFragment() {
 			link {
 				setTitle(R.string.home_prefs)
 				setContent(R.string.pref_home_description)
-				icon = R.drawable.ic_house
+				icon = R.drawable.ic_sections
 				withFragment<HomePreferencesScreen>()
 			}
 
 			link {
 				setTitle(R.string.pref_libraries)
 				setContent(R.string.pref_libraries_description)
-				icon = R.drawable.ic_grid
+				icon = R.drawable.ic_libraries
 				withFragment<LibrariesPreferencesScreen>()
 			}
 		}
