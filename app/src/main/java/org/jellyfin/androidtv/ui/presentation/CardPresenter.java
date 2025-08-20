@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import static android.view.View.FOCUS_DOWN;
 import android.widget.ImageView;
 
 import androidx.annotation.ColorInt;
@@ -43,6 +44,7 @@ public class CardPresenter extends Presenter {
     private boolean mShowInfo = true;
     private boolean isUserView = false;
     private boolean isUniformAspect = false;
+    private boolean isHomeScreen = false;
     private final Lazy<ImageHelper> imageHelper = KoinJavaComponent.<ImageHelper>inject(ImageHelper.class);
 
     public CardPresenter() {
@@ -64,9 +66,13 @@ public class CardPresenter extends Presenter {
         mStaticHeight = staticHeight;
     }
 
+    public void setHomeScreen(boolean isHomeScreen) {
+        this.isHomeScreen = isHomeScreen;
+    }
+
     class ViewHolder extends Presenter.ViewHolder {
-        private int cardWidth = 115;
-        private int cardHeight = 140;
+        private int cardWidth = 104; // 115 * 0.9
+        private int cardHeight = 126; // 140 * 0.9
 
         private BaseRowItem mItem;
         private LegacyImageCardView mCardView;
@@ -143,6 +149,14 @@ public class CardPresenter extends Presenter {
                             } else {
                                 mDefaultCardImage = ContextCompat.getDrawable(mCardView.getContext(), R.drawable.tile_land_tv);
                                 aspect = ImageHelper.ASPECT_RATIO_16_9;
+                                // Reduce size by 10% for home screen
+                                cardWidth = (int)(cardWidth * 0.9);
+                                cardHeight = (int)(cardHeight * 0.9);
+                                if (isHomeScreen) {
+                                    lHeight = (int)(lHeight * 0.8);
+                                    pHeight = (int)(pHeight * 0.8);
+                                    sHeight = (int)(sHeight * 0.8);
+                                }
                                 if (itemDto.getLocationType() != null) {
                                     switch (itemDto.getLocationType()) {
                                         case FILE_SYSTEM:
@@ -343,6 +357,63 @@ public class CardPresenter extends Presenter {
 
         ViewHolder holder = (ViewHolder) viewHolder;
         holder.setItem(rowItem, mImageType, 130, 150, mStaticHeight);
+
+        if (holder.mCardView != null) {
+            holder.mCardView.setFocusable(true);
+            holder.mCardView.setFocusableInTouchMode(true);
+            // Remove elevation and shadow effects but keep the white border on focus
+            holder.mCardView.setElevation(0);
+            holder.mCardView.setSelected(false);
+            // Set up focus handling with minimal elevation and white border
+            holder.mCardView.setFocusable(true);
+            holder.mCardView.setFocusableInTouchMode(true);
+            holder.mCardView.setSelected(false);
+
+            // Set minimum possible elevation (0.1dp)
+            final float minElevation = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                0.1f,
+                holder.mCardView.getContext().getResources().getDisplayMetrics()
+            );
+
+            // Set up a focus change listener to handle the border and elevation
+            holder.mCardView.setOnFocusChangeListener((v, hasFocus) -> {
+                v.setSelected(hasFocus);
+
+                // Apply minimal elevation when focused
+                if (hasFocus) {
+                    v.setElevation(minElevation);
+                    v.setTranslationZ(minElevation);
+                } else {
+                    v.setElevation(0);
+                    v.setTranslationZ(0);
+                }
+
+                // Manually set the foreground drawable for the border with API level check
+                View mainImage = v.findViewById(R.id.main_image);
+                if (mainImage != null) {
+                    if (hasFocus) {
+                        // Get the border drawable from resources
+                        Drawable border = ContextCompat.getDrawable(
+                            v.getContext(),
+                            R.drawable.card_focused_border
+                        );
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                            mainImage.setForeground(border);
+                        } else {
+                            // For API < 23, set the background instead (with padding to avoid covering content)
+                            mainImage.setBackground(border);
+                        }
+                    } else {
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                            mainImage.setForeground(null);
+                        } else {
+                            mainImage.setBackground(null);
+                        }
+                    }
+                }
+            });
+        }
 
         holder.mCardView.setTitleText(rowItem.getCardName(holder.mCardView.getContext()));
         holder.mCardView.setContentText(rowItem.getSubText(holder.mCardView.getContext()));
