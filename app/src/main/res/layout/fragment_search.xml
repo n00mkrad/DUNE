@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <!-- Search bar row -->
+
+    <EditText
+        android:id="@+id/search_bar"
+        style="@style/Input.BlackWithWhiteBorder"
+        android:layout_width="856dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="40dp"
+        android:hint="@string/lbl_search_hint"
+        android:imeOptions="actionSearch"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        android:privateImeOptions="horizontalAlignment=right"
+        android:textColorLink="#0B0B0B"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.65"
+        tools:ignore="VisualLintTextFieldSize,VisualLintBounds,TouchTargetSizeCheck" />
+
+    <FrameLayout
+        android:id="@+id/voice_search_icon_frame"
+        android:layout_width="48dp"
+        android:layout_height="41dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="904dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/voice_search_icon"
+            android:layout_width="48dp"
+            android:layout_height="43dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:contentDescription="@string/lbl_voice_search"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:src="@drawable/ic_mic2"
+            android:tint="@color/mic_icon_tint"
+            tools:layout_editor_absoluteX="5dp"
+            tools:layout_editor_absoluteY="16dp" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/results_frame"
+        android:layout_width="1005dp"
+        android:layout_height="447dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="193dp"
+        android:layout_marginEnd="1dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.571"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        tools:ignore="VisualLintBounds">
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
