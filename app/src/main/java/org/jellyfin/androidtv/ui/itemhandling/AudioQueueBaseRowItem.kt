@@ -1,13 +1,13 @@
 package org.jellyfin.androidtv.ui.itemhandling
+import org.jellyfin.sdk.model.api.BaseItemDto
 
-import org.jellyfin.playback.core.queue.QueueEntry
-import org.jellyfin.playback.jellyfin.queue.baseItem
-
+// Audio queue row item
 class AudioQueueBaseRowItem(
-	val queueEntry: QueueEntry,
+	item: BaseItemDto
 ) : BaseItemDtoBaseRowItem(
-	item = requireNotNull(queueEntry.baseItem) { "AudioQueueBaseRowItem requires the BaseItem to be set on QueueEntry" },
-	staticHeight = true,
+	item = item,
+	staticHeight = true
 ) {
+	// Playing state
 	var playing: Boolean = false
 }
