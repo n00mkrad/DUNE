@@ -1,3 +1,8 @@
+
+<p align="center">
+  <img src="https://files.catbox.moe/jqk9rl.jpg" alt="DUNE" width="100%">
+</p>
+
 <h1 align="center">DUNE - Jellyfin Android TV Client</h1> 
 
 <div align="center" style="display: flex; gap: 5px; justify-content: center;">
