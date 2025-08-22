@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -8,19 +9,19 @@
         android:id="@+id/clock"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="false"
         android:layout_alignParentEnd="true"
-        android:layout_marginTop="20sp"
-        android:layout_marginEnd="40sp" />
+        android:layout_alignParentTop="false"
+        android:layout_marginEnd="40sp"
+        android:layout_marginTop="20sp" />
 
     <TextView
         android:id="@+id/artistTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
+        android:layout_marginEnd="180sp"
         android:layout_marginStart="40sp"
         android:layout_marginTop="25dp"
-        android:layout_marginEnd="180sp"
         android:ellipsize="end"
         android:fontFamily="sans-serif-light"
         android:maxLines="1"
@@ -31,8 +32,8 @@
         android:id="@+id/genreRow"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/artistTitle"
         android:layout_alignStart="@+id/artistTitle"
+        android:layout_below="@+id/artistTitle"
         android:layout_marginStart="4dp"
         android:minHeight="22sp" />
 
@@ -52,15 +53,15 @@
                 android:id="@+id/detailArea"
                 android:layout_width="match_parent"
                 android:layout_height="250dp"
-                android:layout_toStartOf="@id/preview">
+                android:layout_toStartOf="@id/poster">
 
                 <LinearLayout
                     android:id="@+id/information"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="40dp"
                     android:layout_marginStart="40dp"
                     android:layout_marginTop="20dp"
-                    android:layout_marginEnd="40dp"
                     android:gravity="center"
                     android:orientation="vertical">
 
@@ -99,12 +100,12 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@id/progress"
+                    android:id="@+id/progress"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/information"
-                    android:layout_alignStart="@id/buttonRow"
                     android:layout_alignEnd="@id/buttonRow"
+                    android:layout_alignStart="@id/buttonRow"
+                    android:layout_below="@id/information"
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="20dp"
                     android:orientation="horizontal">
@@ -118,11 +119,17 @@
                         android:textSize="16sp"
                         tools:text="0:00" />
 
-                    <androidx.compose.ui.platform.ComposeView
+                    <ProgressBar
                         android:id="@+id/playerProgress"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1" />
+                        android:layout_marginBottom="20dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_weight="1"
+                        android:maxHeight="5sp"
+                        style="@style/player_progress" />
 
                     <TextView
                         android:id="@+id/remainingTime"
@@ -150,99 +157,116 @@
 
                     <ImageButton
                         android:id="@+id/prevBtn"
-                        style="@style/Button.Icon"
                         android:layout_width="28sp"
                         android:layout_height="28sp"
-                        android:src="@drawable/ic_previous" />
+                        android:src="@drawable/ic_previous"
+                        style="@style/Button.Icon" />
 
                     <ImageButton
                         android:id="@+id/rewindBtn"
-                        style="@style/Button.Icon"
                         android:layout_width="28sp"
                         android:layout_height="28sp"
-                        android:src="@drawable/ic_rewind" />
+                        android:src="@drawable/ic_rewind"
+                        style="@style/Button.Icon" />
 
                     <ImageButton
                         android:id="@+id/playPauseBtn"
-                        style="@style/Button.Icon"
                         android:layout_width="28sp"
                         android:layout_height="28sp"
-                        android:src="@drawable/ic_pause" />
+                        android:src="@drawable/ic_pause"
+                        style="@style/Button.Icon" />
 
                     <ImageButton
                         android:id="@+id/fastForwardBtn"
-                        style="@style/Button.Icon"
                         android:layout_width="28sp"
                         android:layout_height="28sp"
-                        android:src="@drawable/ic_fast_forward" />
+                        android:src="@drawable/ic_fast_forward"
+                        style="@style/Button.Icon" />
 
                     <ImageButton
                         android:id="@+id/nextBtn"
-                        style="@style/Button.Icon"
                         android:layout_width="28sp"
                         android:layout_height="28sp"
-                        android:src="@drawable/ic_next" />
+                        android:src="@drawable/ic_next"
+                        style="@style/Button.Icon" />
 
                     <ImageButton
                         android:id="@+id/repeatBtn"
-                        style="@style/Button.Icon"
                         android:layout_width="28sp"
                         android:layout_height="28sp"
-                        android:src="@drawable/ic_loop" />
+                        android:src="@drawable/ic_loop"
+                        style="@style/Button.Icon" />
 
                     <ImageButton
                         android:id="@+id/shuffleBtn"
-                        style="@style/Button.Icon"
                         android:layout_width="28sp"
                         android:layout_height="28sp"
-                        android:src="@drawable/ic_shuffle" />
+                        android:src="@drawable/ic_shuffle"
+                        style="@style/Button.Icon" />
 
                     <ImageButton
                         android:id="@+id/albumBtn"
-                        style="@style/Button.Icon"
                         android:layout_width="28sp"
                         android:layout_height="28sp"
-                        android:src="@drawable/ic_album" />
+                        android:src="@drawable/ic_album"
+                        style="@style/Button.Icon" />
 
                     <ImageButton
                         android:id="@+id/artistBtn"
-                        style="@style/Button.Icon"
                         android:layout_width="28sp"
                         android:layout_height="28sp"
-                        android:src="@drawable/ic_user" />
+                        android:src="@drawable/ic_user"
+                        style="@style/Button.Icon" />
 
                 </LinearLayout>
             </RelativeLayout>
 
-            <androidx.compose.ui.platform.ComposeView
-                android:id="@+id/preview"
+            <FrameLayout
                 android:layout_width="250dp"
                 android:layout_height="250dp"
                 android:layout_alignParentEnd="true"
-                android:layout_marginEnd="60dp" />
+                android:layout_marginEnd="60dp"
+                android:background="@drawable/audio_now_playing_album_background" />
+
+            <org.jellyfin.androidtv.ui.AsyncImageView
+                android:id="@+id/poster"
+                android:layout_width="250dp"
+                android:layout_height="250dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="60dp"
+                android:background="@drawable/shape_card" />
+
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/lyrics"
+                android:layout_width="250dp"
+                android:layout_height="250dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="60dp"
+                android:background="@drawable/shape_card"
+                android:descendantFocusability="blocksDescendants"
+                android:focusable="false" />
 
             <FrameLayout
                 android:id="@+id/rowsFragment"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
-                android:layout_below="@+id/detailArea"
                 android:layout_alignParentBottom="false"
+                android:layout_below="@+id/detailArea"
                 android:layout_marginTop="30dp" />
 
             <TextView
                 android:id="@+id/counter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
-                android:layout_marginEnd="40dp"
+                android:layout_alignParentEnd="true"
                 android:layout_marginBottom="25sp"
+                android:layout_marginEnd="40dp"
                 android:fontFamily="sans-serif-light"
                 android:textAlignment="viewEnd"
                 android:textSize="18sp"
                 tools:text="0 | 0" />
 
         </RelativeLayout>
-
     </ScrollView>
 </RelativeLayout>
