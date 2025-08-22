@@ -4,22 +4,34 @@ import org.jellyfin.sdk.model.api.ItemFields
 
 object ItemRepository {
 	val itemFields = setOf(
-		ItemFields.CAN_DELETE,
-		ItemFields.CHANNEL_INFO,
-		ItemFields.CHAPTERS,
-		ItemFields.CHILD_COUNT,
-		ItemFields.CUMULATIVE_RUN_TIME_TICKS,
-		ItemFields.DATE_CREATED,
-		ItemFields.DISPLAY_PREFERENCES_ID,
-		ItemFields.GENRES,
-		ItemFields.ITEM_COUNTS,
-		ItemFields.MEDIA_SOURCE_COUNT,
-		ItemFields.MEDIA_SOURCES,
-		ItemFields.MEDIA_STREAMS,
+		// Item metadata
 		ItemFields.OVERVIEW,
-		ItemFields.PATH,
-		ItemFields.PRIMARY_IMAGE_ASPECT_RATIO,
+		ItemFields.GENRES,
 		ItemFields.TAGLINES,
+		ItemFields.DATE_CREATED,
+		ItemFields.PATH,
+
+		// Media information
+		ItemFields.MEDIA_SOURCES,
+		ItemFields.MEDIA_SOURCE_COUNT,
+		ItemFields.MEDIA_STREAMS,
+		ItemFields.CHAPTERS,
 		ItemFields.TRICKPLAY,
+
+		// Image and display
+		ItemFields.PRIMARY_IMAGE_ASPECT_RATIO,
+		ItemFields.SERIES_PRIMARY_IMAGE,
+		ItemFields.DISPLAY_PREFERENCES_ID,
+
+		// Item counts and properties
+		ItemFields.CHILD_COUNT,
+		ItemFields.ITEM_COUNTS,
+		ItemFields.CUMULATIVE_RUN_TIME_TICKS,
+
+		// Permissions
+		ItemFields.CAN_DELETE,
+
+		// Channel information
+		ItemFields.CHANNEL_INFO
 	)
 }
