@@ -67,6 +67,17 @@ fun createDeviceProfile(
 	pgsDirectPlay = userPreferences[UserPreferences.pgsDirectPlay],
 )
 
+/**
+ * device profile for Jellyfin playback with specified parameters.
+ * @param mediaTest Media codec capabilities test instance.
+ * @param maxBitrate Maximum bitrate for playback.
+ * @param disableDirectPlay Whether to disable direct play.
+ * @param isAC3Enabled Whether AC3 audio is enabled.
+ * @param downMixAudio Whether to downmix audio to stereo.
+ * @param assDirectPlay Whether ASS subtitles can be directly played.
+ * @param pgsDirectPlay Whether PGS subtitles can be directly played.
+ * @return A configured DeviceProfile.
+ */
 fun createDeviceProfile(
 	mediaTest: MediaCodecCapabilitiesTest,
 	maxBitrate: Int,
@@ -81,7 +92,7 @@ fun createDeviceProfile(
 		!isAC3Enabled -> supportedAudioCodecs.filterNot { it == Codec.Audio.EAC3 || it == Codec.Audio.AC3 }.toTypedArray()
 		else -> supportedAudioCodecs
 	}
-
+	// Query media capabilities
 	val supportsHevc = mediaTest.supportsHevc()
 	val supportsHevcMain10 = mediaTest.supportsHevcMain10()
 	val hevcMainLevel = mediaTest.getHevcMainLevel()
@@ -96,6 +107,7 @@ fun createDeviceProfile(
 	val maxResolutionHevc = mediaTest.getMaxResolution(MimeTypes.VIDEO_H265)
 	val maxResolutionAV1 = mediaTest.getMaxResolution(MimeTypes.VIDEO_AV1)
 
+	// Configure bitrate limits
 	name = "AndroidTV-Default"
 
 	/// Bitrate
@@ -130,7 +142,7 @@ fun createDeviceProfile(
 		audioCodec(Codec.Audio.MP3)
 	}
 
-	/// Direct play profiles
+	/// direct play profiles for video and audio
 	if (!disableDirectPlay) {
 		// Video
 		directPlayProfile {
@@ -240,7 +252,7 @@ fun createDeviceProfile(
 		}
 	}
 
-	// H264 ref frames profile
+	// H.264 codec profiles
 	codecProfile {
 		type = CodecType.VIDEO
 		codec = Codec.Video.H264
@@ -254,7 +266,7 @@ fun createDeviceProfile(
 		}
 	}
 
-	// HEVC profiles
+	// HEVC codec profiles
 	codecProfile {
 		type = CodecType.VIDEO
 		codec = Codec.Video.HEVC
@@ -324,7 +336,7 @@ fun createDeviceProfile(
 		}
 	}
 
-	// HEVC
+	// HEVC codec profiles
 	codecProfile {
 		type = CodecType.VIDEO
 		codec = Codec.Video.HEVC
@@ -335,7 +347,7 @@ fun createDeviceProfile(
 		}
 	}
 
-	// AV1
+	// AV1 codec profiles
 	codecProfile {
 		type = CodecType.VIDEO
 		codec = Codec.Video.AV1
@@ -346,7 +358,7 @@ fun createDeviceProfile(
 		}
 	}
 
-	// HDR
+	// HDR support profile
 	codecProfile {
 		type = CodecType.VIDEO
 
@@ -354,8 +366,6 @@ fun createDeviceProfile(
 			if (!mediaTest.supportsDolbyVision()) ProfileConditionValue.VIDEO_RANGE_TYPE notEquals VideoRangeType.DOVI.serialName
 			if (!mediaTest.supportsHdr10()) ProfileConditionValue.VIDEO_RANGE_TYPE notEquals VideoRangeType.HDR10.serialName
 			if (!mediaTest.supportsHdr10Plus()) {
-				ProfileConditionValue.VIDEO_RANGE_TYPE notEquals VideoRangeType.DOVI_WITH_HDR10_PLUS.serialName
-				ProfileConditionValue.VIDEO_RANGE_TYPE notEquals VideoRangeType.DOVI_WITH_ELHDR10_PLUS.serialName
 			}
 		}
 	}.let {
@@ -363,7 +373,10 @@ fun createDeviceProfile(
 		if (it.conditions.isEmpty()) codecProfiles.remove(it)
 	}
 
-	// Audio channel profile
+	/**
+	 * audio channel profile based on downmix preference.
+	 */
+
 	codecProfile {
 		type = CodecType.VIDEO_AUDIO
 
@@ -375,6 +388,11 @@ fun createDeviceProfile(
 	/// Subtitle profiles
 	// Jellyfin server only supports WebVTT subtitles in HLS, other text subtitles will be converted to WebVTT
 	// which we do not want so only allow delivery over HLS for WebVTT subtitles
+
+	/**
+	 * subtitle profiles for various formats.
+	 */
+
 	subtitleProfile(Codec.Subtitle.VTT, embedded = true, hls = true, external = true)
 	subtitleProfile(Codec.Subtitle.WEBVTT, embedded = true, hls = true, external = true)
 
@@ -392,6 +410,7 @@ fun createDeviceProfile(
 	// ASS/SSA is supported via libass extension
 	subtitleProfile(Codec.Subtitle.ASS, encode = true, embedded = assDirectPlay, external = assDirectPlay)
 	subtitleProfile(Codec.Subtitle.SSA, encode = true, embedded = assDirectPlay, external = assDirectPlay)
+
 }
 
 // Little helper function to more easily define subtitle profiles
