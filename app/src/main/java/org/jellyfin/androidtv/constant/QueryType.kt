@@ -1,46 +1,37 @@
 package org.jellyfin.androidtv.constant
+import timber.log.Timber
 
+// Enum defining query types for Jellyfin API requests
 enum class QueryType {
-	// General content queries
 	Items,
-	Search,
-	StaticItems,
-	LatestItems,
-	Resume,
-
-	// Series-related queries
-	SeriesTimer,
-	Season,
-	SimilarSeries,
-	Specials,
-
-	// Movie-related queries
-	SimilarMovies,
-	Premieres,
-	Upcoming,
-
-	// Library and view queries
+	NextUp,
 	Views,
+	Season,
+	Upcoming,
+	SimilarSeries,
+	SimilarMovies,
+	StaticPeople,
 	StaticChapters,
-
-	// Media-specific queries
+	Search,
+	Specials,
 	AdditionalParts,
 	Trailers,
-
-	// Live TV queries
 	LiveTvChannel,
 	LiveTvProgram,
 	LiveTvRecording,
-
-	// Audio-related queries
+	StaticItems,
+	StaticAudioQueueItems,
 	Artists,
 	AlbumArtists,
 	AudioPlaylists,
-	StaticAudioQueueItems,
+	LatestItems,
+	SeriesTimer,
+	Premieres,
+	Resume;
 
-	// People queries
-	StaticPeople,
-
-	// Playback queries
-	NextUp
+	companion object {
+		init {
+			Timber.d("Initializing QueryType enum with %d values", values().size)
+		}
+	}
 }
