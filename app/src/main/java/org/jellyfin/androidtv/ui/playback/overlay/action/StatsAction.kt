@@ -376,7 +376,6 @@ class StatsAction(
                     }
 
                     // Transcoding reasons
-					// not 100% accurate
                     val reasons = mutableListOf<String>()
 
                     // Check if video is being transcoded
