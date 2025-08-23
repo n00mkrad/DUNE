@@ -1,5 +1,4 @@
 package org.jellyfin.androidtv.ui.composable
-
 import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import androidx.compose.runtime.Composable
@@ -15,7 +14,9 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.viewinterop.AndroidView
 import org.jellyfin.androidtv.ui.AsyncImageView
 import org.jellyfin.androidtv.util.BlurHashDecoder
+import androidx.core.graphics.createBitmap
 
+// Composable functions for asynchronous image loading with BlurHash support
 private data class AsyncImageState(
 	val url: String?,
 	val blurHash: String?,
@@ -28,11 +29,10 @@ fun AsyncImage(
 	blurHash: String? = null,
 	placeholder: Drawable? = null,
 	aspectRatio: Float = 1f,
-	blurHashResolution: Int = 32,
+	blurHashResolution: Int = 22,
 	scaleType: ImageView.ScaleType? = null,
 ) {
-	// Only the important properties are added to AsyncImageState
-	var state by remember { mutableStateOf<AsyncImageState?>(null) }
+	var state by remember(url, blurHash) { mutableStateOf(AsyncImageState(url, blurHash)) }
 
 	AndroidView(
 		modifier = modifier,
@@ -43,18 +43,13 @@ fun AsyncImage(
 			}
 		},
 		update = { view ->
-			val compositionState = AsyncImageState(url, blurHash)
-			if (state != compositionState) {
-				state = compositionState
-
-				view.load(
-					url = compositionState.url,
-					blurHash = compositionState.blurHash,
-					placeholder = placeholder,
-					aspectRatio = aspectRatio.toDouble(),
-					blurHashResolution = blurHashResolution,
-				)
-			}
+			view.load(
+				url = state.url,
+				blurHash = state.blurHash,
+				placeholder = placeholder,
+				aspectRatio = aspectRatio.toDouble(),
+				blurHashResolution = blurHashResolution,
+			)
 		},
 	)
 }
@@ -71,6 +66,5 @@ fun blurHashPainter(
 		height = size.height,
 		punch = punch,
 	)
-
-	BitmapPainter(requireNotNull(bitmap).asImageBitmap())
+	bitmap?.let { BitmapPainter(it.asImageBitmap()) } ?: BitmapPainter(createBitmap(1, 1).asImageBitmap())
 }
