@@ -125,7 +125,8 @@ public class ItemListFragment extends Fragment implements View.OnKeyListener {
                 row.getLocationOnScreen(location);
                 int y = location[1];
                 if (y > mBottomScrollThreshold) {
-                    // too close to bottom - scroll down
+                     // too close to bottom - scroll down
+                    Timber.d("Scrolling view by %d pixels to keep row in center", y - mBottomScrollThreshold);
                     mScrollView.smoothScrollBy(0, y - mBottomScrollThreshold);
                 }
             }
@@ -304,7 +305,7 @@ public class ItemListFragment extends Fragment implements View.OnKeyListener {
 
         LinearLayout mainInfoRow = requireActivity().findViewById(R.id.fdMainInfoRow);
 
-        InfoLayoutHelper.addInfoRow(requireContext(), item, mainInfoRow, false);
+        InfoLayoutHelper.addInfoRow(requireContext(), item, mainInfoRow, false, false);
         addGenres(mGenreRow);
         addButtons(BUTTON_SIZE);
         mSummary.setText(mBaseItem.getOverview());
