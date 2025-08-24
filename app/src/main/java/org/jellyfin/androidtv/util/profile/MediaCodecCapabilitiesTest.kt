@@ -7,7 +7,9 @@ import android.media.MediaFormat
 import android.os.Build
 import android.util.Size
 import android.view.Display
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import org.jellyfin.androidtv.util.HdrHelper
 import timber.log.Timber
 
 class MediaCodecCapabilitiesTest(
@@ -15,6 +17,7 @@ class MediaCodecCapabilitiesTest(
 ) {
 	private val display by lazy { ContextCompat.getDisplayOrDefault(context) }
 	private val mediaCodecList by lazy { MediaCodecList(MediaCodecList.REGULAR_CODECS) }
+	private val hdrHelper by lazy { HdrHelper }
 
 	@Suppress("DEPRECATION")
 	private val supportedHdrTypes by lazy {
@@ -206,15 +209,90 @@ class MediaCodecCapabilitiesTest(
 		return Size(maxWidth, maxHeight)
 	}
 
-	fun supportsDolbyVision(): Boolean {
-		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && supportedHdrTypes.contains(Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION)
-	}
-
+	/**
+	 * Check if the device supports HDR10
+	 */
+	@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 	fun supportsHdr10(): Boolean {
-		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && supportedHdrTypes.contains(Display.HdrCapabilities.HDR_TYPE_HDR10)
+		// First check using the display's HDR capabilities
+		val displaySupportsHdr10 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N &&
+			supportedHdrTypes.contains(Display.HdrCapabilities.HDR_TYPE_HDR10)
+
+		// Also check using the HDR helper for codec-level support
+		return displaySupportsHdr10 || hdrHelper.supportsHdr10()
 	}
 
+	/**
+	 * Check if the device supports HDR10+
+	 *
+	 * @return true if the device supports HDR10+, false otherwise
+	 */
+	@RequiresApi(Build.VERSION_CODES.Q)
 	fun supportsHdr10Plus(): Boolean {
-		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && supportedHdrTypes.contains(Display.HdrCapabilities.HDR_TYPE_HDR10_PLUS)
+		return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+			supportedHdrTypes.contains(Display.HdrCapabilities.HDR_TYPE_HDR10_PLUS)
+		} else {
+			false
+		}
+	}
+
+	/**
+	 * Check if the device supports HLG (Hybrid Log-Gamma)
+	 */
+	@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+	fun supportsHlg(): Boolean = hdrHelper.supportsHlg()
+
+	/**
+	 * Check if the device supports Dolby Vision
+	 */
+	@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+	fun supportsDolbyVision(): Boolean {
+		// First check using the display's HDR capabilities
+		val displaySupportsDolbyVision = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N &&
+			supportedHdrTypes.contains(Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION)
+
+		// Also check using the HDR helper for codec-level support
+		return displaySupportsDolbyVision || hdrHelper.supportsDolbyVision()
+	}
+
+	/**
+	 * Get the best HDR type supported by the device
+	 */
+	@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+	fun getBestHdrType(): String? {
+		// First check display capabilities
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+			when {
+				supportedHdrTypes.contains(Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION) ->
+					return HdrHelper.HDR_TYPE_DOLBY_VISION
+				supportedHdrTypes.contains(Display.HdrCapabilities.HDR_TYPE_HDR10_PLUS) ->
+					return HdrHelper.HDR_TYPE_HDR10_PLUS
+				supportedHdrTypes.contains(Display.HdrCapabilities.HDR_TYPE_HDR10) ->
+					return HdrHelper.HDR_TYPE_HDR10
+				supportedHdrTypes.contains(Display.HdrCapabilities.HDR_TYPE_HLG) ->
+					return HdrHelper.HDR_TYPE_HLG
+			}
+		}
+
+		// Fall back to HDR helper if no display HDR info is available
+		return hdrHelper.getBestHdrType()
+	}
+
+	/**
+	 * Log HDR capabilities of the device
+	 */
+	@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+	fun logHdrCapabilities() {
+		Timber.d("HDR Capabilities:")
+		Timber.d("  HDR10: ${supportsHdr10()}")
+		Timber.d("  HDR10+: ${if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) supportsHdr10Plus() else "Requires Android 10+"}")
+		Timber.d("  HLG: ${supportsHlg()}")
+		Timber.d("  Dolby Vision: ${supportsDolbyVision()}")
+		Timber.d("  Best HDR type: ${getBestHdrType() ?: "None"}")
+
+		// Log display HDR types
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+			Timber.d("  Display HDR types: ${supportedHdrTypes.joinToString()}")
+		}
 	}
 }

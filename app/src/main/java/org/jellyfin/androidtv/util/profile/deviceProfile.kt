@@ -1,6 +1,7 @@
 package org.jellyfin.androidtv.util.profile
 
 import android.content.Context
+import android.os.Build
 import androidx.media3.common.MimeTypes
 import org.jellyfin.androidtv.constant.Codec
 import org.jellyfin.androidtv.preference.UserPreferences
@@ -14,6 +15,7 @@ import org.jellyfin.sdk.model.api.SubtitleDeliveryMethod
 import org.jellyfin.sdk.model.api.VideoRangeType
 import org.jellyfin.sdk.model.deviceprofile.DeviceProfileBuilder
 import org.jellyfin.sdk.model.deviceprofile.buildDeviceProfile
+import timber.log.Timber
 
 private val downmixSupportedAudioCodecs = arrayOf(
 	Codec.Audio.AAC,
@@ -21,27 +23,29 @@ private val downmixSupportedAudioCodecs = arrayOf(
 	Codec.Audio.MP3,
 )
 
-private val supportedAudioCodecs = arrayOf(
-	Codec.Audio.AAC,
-	Codec.Audio.AAC_LATM,
-	Codec.Audio.AC3,
-	Codec.Audio.ALAC,
-	Codec.Audio.DCA,
-	Codec.Audio.DTS,
-	Codec.Audio.EAC3,
-	Codec.Audio.FLAC,
-	Codec.Audio.MLP,
-	Codec.Audio.MP2,
-	Codec.Audio.MP3,
-	Codec.Audio.OPUS,
-	Codec.Audio.PCM_ALAW,
-	Codec.Audio.PCM_MULAW,
-	Codec.Audio.PCM_S16LE,
-	Codec.Audio.PCM_S20LE,
-	Codec.Audio.PCM_S24LE,
-	Codec.Audio.TRUEHD,
-	Codec.Audio.VORBIS,
-)
+private fun getSupportedAudioCodecs(isAC3Enabled: Boolean): Array<String> {
+	// The fallback will be handled by the PlaybackManager
+	return arrayOf(
+		Codec.Audio.AAC,
+		Codec.Audio.AAC_LATM,
+		Codec.Audio.ALAC,
+		Codec.Audio.DCA,
+		Codec.Audio.DTS,
+		Codec.Audio.FLAC,
+		Codec.Audio.MLP,
+		Codec.Audio.MP2,
+		Codec.Audio.MP3,
+		Codec.Audio.OPUS,
+		Codec.Audio.PCM_ALAW,
+		Codec.Audio.PCM_MULAW,
+		Codec.Audio.PCM_S16LE,
+		Codec.Audio.PCM_S20LE,
+		Codec.Audio.PCM_S24LE,
+		Codec.Audio.TRUEHD,
+		Codec.Audio.VORBIS,
+		Codec.Audio.DTS)
+
+}
 
 private fun UserPreferences.getMaxBitrate(): Int {
 	var maxBitrate = this[UserPreferences.maxBitrate].toIntOrNull()
@@ -87,12 +91,9 @@ fun createDeviceProfile(
 	assDirectPlay: Boolean,
 	pgsDirectPlay: Boolean,
 ) = buildDeviceProfile {
-	val allowedAudioCodecs = when {
-		downMixAudio -> downmixSupportedAudioCodecs
-		!isAC3Enabled -> supportedAudioCodecs.filterNot { it == Codec.Audio.EAC3 || it == Codec.Audio.AC3 }.toTypedArray()
-		else -> supportedAudioCodecs
-	}
-	// Query media capabilities
+	val allowedAudioCodecs = if (downMixAudio) downmixSupportedAudioCodecs
+	else getSupportedAudioCodecs(isAC3Enabled)
+
 	val supportsHevc = mediaTest.supportsHevc()
 	val supportsHevcMain10 = mediaTest.supportsHevcMain10()
 	val hevcMainLevel = mediaTest.getHevcMainLevel()
@@ -107,7 +108,6 @@ fun createDeviceProfile(
 	val maxResolutionHevc = mediaTest.getMaxResolution(MimeTypes.VIDEO_H265)
 	val maxResolutionAV1 = mediaTest.getMaxResolution(MimeTypes.VIDEO_AV1)
 
-	// Configure bitrate limits
 	name = "AndroidTV-Default"
 
 	/// Bitrate
@@ -142,7 +142,7 @@ fun createDeviceProfile(
 		audioCodec(Codec.Audio.MP3)
 	}
 
-	/// direct play profiles for video and audio
+	/// Direct play profiles
 	if (!disableDirectPlay) {
 		// Video
 		directPlayProfile {
@@ -252,7 +252,7 @@ fun createDeviceProfile(
 		}
 	}
 
-	// H.264 codec profiles
+	// H264 ref frames profile
 	codecProfile {
 		type = CodecType.VIDEO
 		codec = Codec.Video.H264
@@ -266,7 +266,7 @@ fun createDeviceProfile(
 		}
 	}
 
-	// HEVC codec profiles
+	// HEVC profiles
 	codecProfile {
 		type = CodecType.VIDEO
 		codec = Codec.Video.HEVC
@@ -336,7 +336,7 @@ fun createDeviceProfile(
 		}
 	}
 
-	// HEVC codec profiles
+	// HEVC
 	codecProfile {
 		type = CodecType.VIDEO
 		codec = Codec.Video.HEVC
@@ -347,7 +347,7 @@ fun createDeviceProfile(
 		}
 	}
 
-	// AV1 codec profiles
+	// AV1
 	codecProfile {
 		type = CodecType.VIDEO
 		codec = Codec.Video.AV1
@@ -358,25 +358,43 @@ fun createDeviceProfile(
 		}
 	}
 
-	// HDR support profile
+	// HDR
 	codecProfile {
 		type = CodecType.VIDEO
 
 		conditions {
-			if (!mediaTest.supportsDolbyVision()) ProfileConditionValue.VIDEO_RANGE_TYPE notEquals VideoRangeType.DOVI.serialName
-			if (!mediaTest.supportsHdr10()) ProfileConditionValue.VIDEO_RANGE_TYPE notEquals VideoRangeType.HDR10.serialName
-			if (!mediaTest.supportsHdr10Plus()) {
+			// Check HDR types in order of quality/priority
+			if (!mediaTest.supportsDolbyVision()) {
+				ProfileConditionValue.VIDEO_RANGE_TYPE notEquals VideoRangeType.DOVI.serialName
+			}
+
+			// Only check HDR10+ on Android 10+ (API 29+)
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !mediaTest.supportsHdr10Plus()) {
+				ProfileConditionValue.VIDEO_RANGE_TYPE notEquals VideoRangeType.HDR10_PLUS.serialName
+			}
+
+			if (!mediaTest.supportsHdr10()) {
+				ProfileConditionValue.VIDEO_RANGE_TYPE notEquals VideoRangeType.HDR10.serialName
+			}
+
+			if (!mediaTest.supportsHlg()) {
+				ProfileConditionValue.VIDEO_RANGE_TYPE notEquals VideoRangeType.HLG.serialName
 			}
 		}
 	}.let {
-		// Remove codec profile if all HDR types are fully supported
-		if (it.conditions.isEmpty()) codecProfiles.remove(it)
+		// Log HDR capabilities for debugging
+		mediaTest.logHdrCapabilities()
+
+		// Remove codec profile if all HDR types are supported
+		if (it.conditions.isEmpty()) {
+			Timber.d("All HDR formats are supported")
+			codecProfiles.remove(it)
+		} else {
+			Timber.d("HDR restrictions applied: ${it.conditions.size} conditions")
+		}
 	}
 
-	/**
-	 * audio channel profile based on downmix preference.
-	 */
-
+	// Audio channel profile
 	codecProfile {
 		type = CodecType.VIDEO_AUDIO
 
@@ -388,11 +406,6 @@ fun createDeviceProfile(
 	/// Subtitle profiles
 	// Jellyfin server only supports WebVTT subtitles in HLS, other text subtitles will be converted to WebVTT
 	// which we do not want so only allow delivery over HLS for WebVTT subtitles
-
-	/**
-	 * subtitle profiles for various formats.
-	 */
-
 	subtitleProfile(Codec.Subtitle.VTT, embedded = true, hls = true, external = true)
 	subtitleProfile(Codec.Subtitle.WEBVTT, embedded = true, hls = true, external = true)
 

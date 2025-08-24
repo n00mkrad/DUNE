@@ -16,6 +16,8 @@ import org.jellyfin.sdk.api.client.extensions.videosApi
 import org.jellyfin.sdk.model.api.PlayMethod
 import org.jellyfin.sdk.model.api.PlaybackInfoDto
 import org.jellyfin.sdk.model.api.PlaybackInfoResponse
+import org.jellyfin.sdk.model.api.CodecType
+import timber.log.Timber
 
 private fun createStreamInfo(
 	api: ApiClient,
@@ -62,9 +64,16 @@ class PlaybackManager(
 		startTimeTicks: Long,
 		callback: Response<StreamInfo>,
 	) = lifecycleOwner.lifecycleScope.launch {
-		getVideoStreamInfoInternal(options, startTimeTicks).fold(
-			onSuccess = { callback.onResponse(it) },
-			onFailure = { callback.onError(Exception(it)) },
+		Timber.d("getVideoStreamInfo: Starting playback for item ${options.itemId}")
+		getVideoStreamInfoInternal(options, startTimeTicks, true).fold(
+			onSuccess = {
+				Timber.d("getVideoStreamInfo: Successfully got stream info")
+				callback.onResponse(it)
+			},
+			onFailure = {
+				Timber.e(it, "getVideoStreamInfo: Failed to get stream info")
+				callback.onError(Exception(it))
+			},
 		)
 	}
 
@@ -81,23 +90,38 @@ class PlaybackManager(
 			}
 		}
 
-		getVideoStreamInfoInternal(options, startTimeTicks).fold(
+		getVideoStreamInfoInternal(options, startTimeTicks, true).fold(
 			onSuccess = { callback.onResponse(it) },
 			onFailure = { callback.onError(Exception(it)) },
 		)
 	}
 
+	private fun isAc3Error(throwable: Throwable?): Boolean {
+		if (throwable == null) return false
+		val message = throwable.message?.lowercase() ?: ""
+		return message.contains("ac3") ||
+			   message.contains("eac3") ||
+			   message.contains("audio codec not supported")
+	}
+
 	private suspend fun getVideoStreamInfoInternal(
 		options: VideoOptions,
-		startTimeTicks: Long
-	) = runCatching {
-		val response =withContext(Dispatchers.IO) {
-			api.mediaInfoApi.getPostedPlaybackInfo(
-				itemId = requireNotNull(options.itemId) { "Item id cannot be null" },
-				data = PlaybackInfoDto(
-					mediaSourceId = options.mediaSourceId,
-					startTimeTicks = startTimeTicks,
-					deviceProfile = options.profile,
+		startTimeTicks: Long,
+		attemptAc3: Boolean = true
+	): Result<StreamInfo> {
+		try {
+			Timber.d("getVideoStreamInfoInternal: Attempting playback (AC3 enabled: $attemptAc3)")
+			Timber.d("getVideoStreamInfoInternal: Audio stream index: ${options.audioStreamIndex}")
+			Timber.d("getVideoStreamInfoInternal: Media source ID: ${options.mediaSourceId}")
+			Timber.d("getVideoStreamInfoInternal: Profile: ${options.profile?.containerProfiles?.joinToString()}")
+			val response = withContext(Dispatchers.IO) {
+				Timber.d("getVideoStreamInfoInternal: Requesting playback info from server")
+				api.mediaInfoApi.getPostedPlaybackInfo(
+					itemId = requireNotNull(options.itemId) { "Item id cannot be null" },
+					data = PlaybackInfoDto(
+						mediaSourceId = options.mediaSourceId,
+						startTimeTicks = startTimeTicks,
+						deviceProfile = options.profile,
 					enableDirectStream = options.enableDirectStream,
 					enableDirectPlay = options.enableDirectPlay,
 					maxAudioChannels = options.maxAudioChannels,
@@ -111,11 +135,82 @@ class PlaybackManager(
 		}
 
 		if (response.errorCode != null) {
-			throw PlaybackException().apply {
+			Timber.e("getVideoStreamInfoInternal: Server returned error code: ${response.errorCode}")
+			return Result.failure(PlaybackException().apply {
 				errorCode = response.errorCode!!
-			}
+			})
 		}
 
-		createStreamInfo(api, options, response)
+		val streamInfo = createStreamInfo(api, options, response)
+		val mediaStreams = streamInfo.mediaSource?.mediaStreams ?: emptyList()
+		val audioStreams = mediaStreams.filter { it.type?.name == "Audio" }
+		val selectedAudioStream = audioStreams.find { it.index == options.audioStreamIndex }
+
+		Timber.d("getVideoStreamInfoInternal: Created stream info. PlayMethod: ${streamInfo.playMethod}")
+		Timber.d("MediaSource: ${streamInfo.mediaSource?.path}")
+		if (audioStreams.isNotEmpty()) {
+			Timber.d("Available audio streams: ${audioStreams.joinToString(", ") { "[Index: ${it.index}, Codec: ${it.codec ?: "N/A"}, Language: ${it.language ?: "Unknown"}, Default: ${it.isDefault}, Forced: ${it.isForced}]" }}")
+		} else {
+			Timber.w("No audio streams available in media source")
+		}
+		Timber.d("Selected audio stream: [Index: ${selectedAudioStream?.index ?: -1}, Codec: ${selectedAudioStream?.codec ?: "N/A"}, Language: ${selectedAudioStream?.language ?: "Unknown"}]")
+		Timber.d("Audio stream index in options: ${options.audioStreamIndex}")
+		return Result.success(streamInfo)
+	} catch (e: Exception) {
+		Timber.e(e, "getVideoStreamInfoInternal: Playback failed: ${e.message}")
+
+		// If AC3/E-AC3 was enabled and playback failed, try again with AC3/E-AC3 disabled
+		fun isAc3Error(message: String?): Boolean {
+			if (message == null) return false
+			val lowerMessage = message.lowercase()
+			return lowerMessage.contains("ac3") ||
+				lowerMessage.contains("eac3") ||
+				lowerMessage.contains("audio codec not supported") ||
+				lowerMessage.contains("audio track error") ||
+				lowerMessage.contains("audio playback failed") ||
+				lowerMessage.contains("unsupported audio codec") ||
+				lowerMessage.contains("audio codec not recognized") ||
+				lowerMessage.contains("audio codec error") ||
+				lowerMessage.contains("audio renderer error") ||
+				lowerMessage.contains("audio initialization failed") ||
+				lowerMessage.contains("eac3-joc") ||
+				lowerMessage.contains("eac3_joc")
+		}
+
+		// Check for E-AC3 in the media source or any other indicators
+		val hasEac3 = options.mediaSourceId?.lowercase()?.contains("eac3") == true ||
+				e.stackTraceToString().lowercase().contains("eac3") ||
+				e.stackTraceToString().lowercase().contains("eac3-joc")
+
+		val isAc3RelatedError = isAc3Error(e.message) ||
+				e.cause?.let { cause -> isAc3Error(cause.message) } == true ||
+				e.stackTraceToString().lowercase().contains("ac3") ||
+				hasEac3
+
+		if (attemptAc3 && isAc3RelatedError) {
+			// Log the fallback attempt
+			Timber.w("=== AC3 FALLBACK TRIGGERED ===")
+			Timber.w("Original audio stream index: ${options.audioStreamIndex}")
+			Timber.w("Error: ${e.message}")
+			Timber.w("Cause: ${e.cause?.message}")
+
+			// new options with audio stream reset
+			val fallbackOptions = VideoOptions().apply {
+				itemId = options.itemId
+				mediaSourceId = options.mediaSourceId
+				audioStreamIndex = -1 // Let server auto-select a compatible track
+				subtitleStreamIndex = options.subtitleStreamIndex
+				enableDirectPlay = options.enableDirectPlay
+				enableDirectStream = options.enableDirectStream
+				maxAudioChannels = options.maxAudioChannels
+				profile = options.profile
+			}
+
+			// Retry with the new options
+			return getVideoStreamInfoInternal(fallbackOptions, startTimeTicks, attemptAc3 = false)
+		}
+
+		return Result.failure(e)
 	}
+}
 }
