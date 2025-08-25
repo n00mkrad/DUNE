@@ -14,6 +14,7 @@ import org.jellyfin.androidtv.ui.preference.dsl.link
 import org.jellyfin.androidtv.ui.preference.dsl.list
 import org.jellyfin.androidtv.ui.preference.dsl.optionsScreen
 import org.jellyfin.androidtv.ui.preference.dsl.shortcut
+import org.jellyfin.androidtv.preference.constant.AppLanguage
 import org.jellyfin.androidtv.util.getQuantityString
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -29,6 +30,15 @@ class CustomizationPreferencesScreen : OptionsFragment() {
 			setContent(R.string.enhanced_tweaks_description)
 			icon = R.drawable.ic_enhanced
 			withFragment<EnhancedTweaksPreferencesScreen>()
+		}
+
+		category {
+			link {
+				setTitle(R.string.pref_language)
+				setContent(R.string.pref_language_summary)
+				icon = R.drawable.ic_language
+				withFragment<LanguagePreferencesScreen>()
+			}
 		}
 
 		category {

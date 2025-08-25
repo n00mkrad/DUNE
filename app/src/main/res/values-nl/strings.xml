@@ -4,6 +4,9 @@
     <string name="btn_cancel">Annuleren</string>
     <string name="byletter_letters">ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <string name="pref_playback">Afspelen</string>
+
+
+
     <string name="pref_max_bitrate_title">Limiet bitsnelheid bij streamen</string>
     <string name="settings_title">Voorkeuren</string>
     <string name="chapters">Hoofdstukken</string>
@@ -674,4 +677,9 @@
     <string name="show_live_tv_button_summary">Geef de Live TV-knop weer</string>
     <string name="enhanced_tweaks">Verbeterde instellingen</string>
     <string name="enhanced_tweaks_description">Achtergrondinstellingen, genrerijen, app-thema\'s en meer...</string>
+
+    <!-- Language preference strings -->
+    <string name="pref_language">App-taal</string>
+    <string name="pref_language_header">Taalinstellingen</string>
+    <string name="pref_language_summary">Wijzig de taal die in de app wordt gebruikt</string>
 </resources>

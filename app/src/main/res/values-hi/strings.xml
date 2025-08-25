@@ -2,6 +2,12 @@
 <resources>
     <string name="loading">लोड हो रहा है…</string>
     <string name="pref_playback">प्लेबैक</string>
+    
+    <!-- Language preference strings -->
+    <string name="pref_language">ऐप भाषा</string>
+    <string name="pref_language_header">भाषा सेटिंग्स</string>
+    <string name="pref_language_summary">ऐप में उपयोग की जाने वाली भाषा बदलें</string>
+    
     <string name="pref_max_bitrate_title">मैक्स स्ट्रीमिंग बिटरेट</string>
     <string name="pref_authentication_cat">प्रमाणीकरण</string>
     <string name="chapters">अध्याय</string>

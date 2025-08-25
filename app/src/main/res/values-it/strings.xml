@@ -4,6 +4,8 @@
     <string name="btn_cancel">Annulla</string>
     <string name="byletter_letters">ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <string name="pref_playback">Riproduzione</string>
+
+
     <string name="pref_max_bitrate_title">Bitrate massimo di trasmissione</string>
     <string name="settings_title">Preferenze</string>
     <string name="chapters">Capitoli</string>
@@ -670,6 +672,11 @@
     <string name="move_down">Sposta giù</string>
     <string name="enhanced_tweaks">Miglioramenti migliorati</string>
     <string name="enhanced_tweaks_description">Impostazioni sfondo, righe di genere, temi app e altro ancora...</string>
+
+    <!-- Language preference strings -->
+    <string name="pref_language">Lingua dell\'app</string>
+    <string name="pref_language_header">Impostazioni lingua</string>
+    <string name="pref_language_summary">Cambia la lingua utilizzata nell\'app</string>
     <string name="home_content_description">Contenuto della schermata iniziale</string>
     <string name="lbl_music_videos">Video musicali</string>
     <string name="pref_audio_default_language">Lingua audio predefinita</string>

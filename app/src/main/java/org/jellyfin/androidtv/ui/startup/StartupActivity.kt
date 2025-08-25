@@ -2,6 +2,7 @@ package org.jellyfin.androidtv.ui.startup
 
 import android.Manifest
 import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -48,12 +49,16 @@ import org.jellyfin.androidtv.util.DeviceUtils
 import org.jellyfin.sdk.api.client.ApiClient
 import org.jellyfin.sdk.api.client.extensions.userLibraryApi
 import org.jellyfin.sdk.model.serializer.toUUIDOrNull
+import org.jellyfin.androidtv.util.LocaleUtils
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 import java.util.UUID
 
 class StartupActivity : FragmentActivity() {
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleUtils.wrapContext(newBase))
+    }
 	companion object {
 		const val EXTRA_ITEM_ID = "ItemId"
 		const val EXTRA_ITEM_IS_USER_VIEW = "ItemIsUserView"

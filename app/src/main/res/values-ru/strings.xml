@@ -5,6 +5,12 @@
     <string name="btn_cancel">Отменить</string>
     <string name="byletter_letters">АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЭЮЯ</string>
     <string name="pref_playback">Воспроизведение</string>
+    
+    <!-- Настройки языка -->
+    <string name="pref_language">Язык приложения</string>
+    <string name="pref_language_header">Настройки языка</string>
+    <string name="pref_language_summary">Изменить язык, используемый в приложении</string>
+    
     <string name="pref_max_bitrate_title">Макс. поток. скорость</string>
     <string name="settings_title">Предпочтения</string>
     <string name="chapters">Разделы</string>

@@ -44,6 +44,12 @@
     <string name="settings_title">পছন্দসমূহ</string>
     <string name="pref_max_bitrate_title">সর্বাধিক স্ট্রিমিং বিটরেট</string>
     <string name="pref_playback">প্লেব্যাক</string>
+    
+    <!-- ভাষা সেটিংস -->
+    <string name="pref_language">অ্যাপের ভাষা</string>
+    <string name="pref_language_header">ভাষা সেটিংস</string>
+    <string name="pref_language_summary">অ্যাপে ব্যবহৃত ভাষা পরিবর্তন করুন</string>
+    
     <string name="byletter_letters">ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <string name="btn_cancel">বাতিল</string>
     <string name="loading">লোড হচ্ছে …</string>

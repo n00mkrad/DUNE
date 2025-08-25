@@ -4,6 +4,8 @@
     <string name="btn_cancel">Avbryt</string>
     <string name="byletter_letters">ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ</string>
     <string name="pref_playback">Avspilling</string>
+
+
     <string name="pref_max_bitrate_title">Maks bithastighet på strømming</string>
     <string name="settings_title">Innstillinger</string>
     <string name="chapters">Kapitler</string>
@@ -633,6 +635,11 @@
     <string name="update_install">Installer oppdatering</string>
     <string name="enhanced_tweaks">Flere innstillinger</string>
     <string name="enhanced_tweaks_description">Bakgrunnsinnstillinger, sjangerrader, apptemaer og mer ...</string>
+
+    <!-- Language preference strings -->
+    <string name="pref_language">App-språk</string>
+    <string name="pref_language_header">Språkinnstillinger</string>
+    <string name="pref_language_summary">Endre språket som brukes i appen</string>
     <string name="home_content_description">Innhold på startskjermen</string>
     <string name="lbl_music_videos">Musikkvideoer</string>
     <string name="pref_audio_default_language">Standard lydspråk</string>

@@ -4,6 +4,12 @@
     <string name="btn_cancel">Cancelar</string>
     <string name="byletter_letters">ABCDEFGHIJKLMNÑOPQRSTUVWXYZ</string>
     <string name="pref_playback">Reproducir</string>
+
+    <!-- Configuración de idioma -->
+    <string name="pref_language">Idioma de la aplicación</string>
+    <string name="pref_language_header">Configuración de idioma</string>
+    <string name="pref_language_summary">Cambiar el idioma utilizado en la aplicación</string>
+
     <string name="pref_max_bitrate_title">Máximo bitrate de transmisión</string>
     <string name="settings_title">Preferencias</string>
     <string name="chapters">Capítulos</string>
@@ -625,8 +631,9 @@
     <string name="music_videos">Videos Musicales</string>
     <string name="show_live_tv_button">Botón de TV en Vivo</string>
     <string name="show_live_tv_button_summary">Mostrar el botón de TV en Vivo</string>
-    <string name="enhanced_tweaks">Configuración mejorada</string>
-    <string name="enhanced_tweaks_description">Configuración de fondo, filas de género, temas de aplicaciones y más...</string>
+    <string name="enhanced_tweaks">Ajustes mejorados</string>
+    <string name="enhanced_tweaks_description">Configuración de fondos, filas de géneros, temas de la aplicación y más...</string>
+
     <string name="lbl_music_videos">Videos musicales</string>
     <string name="pref_audio_default_language">Idioma de audio predeterminado</string>
     <string name="pref_default_language_none">(Por defecto)</string>

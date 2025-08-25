@@ -4,6 +4,12 @@
     <string name="btn_cancel">Avbryt</string>
     <string name="byletter_letters">ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ</string>
     <string name="settings_title">Preferenser</string>
+
+    <!-- Språkinställningar -->
+    <string name="pref_language">App-språk</string>
+    <string name="pref_language_header">Språkinställningar</string>
+    <string name="pref_language_summary">Ändra språk som används i appen</string>
+
     <string name="pref_authentication_cat">Autentisering</string>
     <string name="loading">Laddar…</string>
     <string name="lbl_direct_stream_live">Realtidsströmma direktsänd-TV</string>
@@ -593,6 +599,8 @@
     <string name="move_down">Flytta ner</string>
     <string name="enhanced_tweaks">Förbättrade inställningar</string>
     <string name="enhanced_tweaks_description">Bakgrundsinställningar, genrerader, appteman och mer...</string>
+
+    <!-- Language preference strings -->
     <string name="lbl_music_videos">Musikvideor</string>
     <string name="pref_report_device_profile_failure">Kunde inte skicka dokumentet. Din Jellyfin-server kan förbjuda klientloggar.</string>
     <string name="pref_report_device_profile_summary">Ladda upp ett felsökningsdokument till Jellyfin-servern med information om uppspelningsfunktioner</string>

@@ -3,6 +3,7 @@ package org.jellyfin.androidtv.preference
 import android.content.Context
 import android.view.KeyEvent
 import androidx.preference.PreferenceManager
+import org.jellyfin.androidtv.preference.constant.AppLanguage
 import org.jellyfin.androidtv.preference.constant.AppTheme
 import org.jellyfin.androidtv.preference.constant.AudioBehavior
 import org.jellyfin.androidtv.preference.constant.ClockBehavior
@@ -35,19 +36,18 @@ class UserPreferences(context: Context) : SharedPreferenceStore(
 ) {
 
     companion object {
-		/* Display */
         /**
-         * Always show white borders around cards when focused
+         * App language preference
+         * Uses the device default if not set
          */
-        const val showWhiteBorders = true
+        var appLanguage = enumPreference("app_language", AppLanguage.SYSTEM_DEFAULT)
+
+
+        var imageQuality = stringPreference("image_quality", "low")
         /**
-         * Image quality preference: low, normal, high
+         * Select the app theme
          */
-		var imageQuality = stringPreference("image_quality", "low")
-		/**
-		 * Select the app theme
-		 */
-		var appTheme = enumPreference("app_theme", AppTheme.FLEXY)
+        var appTheme = enumPreference("app_theme", AppTheme.FLEXY)
 
 		/**
 		 * Enable background images while browsing
@@ -68,12 +68,6 @@ class UserPreferences(context: Context) : SharedPreferenceStore(
 		 * Backdrop fading intensity from 0 (no fade) to 1.0 (full fade)
 		 */
 		var backdropFadingIntensity = floatPreference("pref_backdrop_fading_intensity", 0.7f)
-
-		/**
-		 * Card size for home screen and library browsing
-		 * Values: "small", "medium", "large"
-		 */
-		var cardSize = stringPreference("card_size", "small")
 
 		/**
 		 * Show premieres on home screen

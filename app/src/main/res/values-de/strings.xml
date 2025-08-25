@@ -4,6 +4,12 @@
     <string name="btn_cancel">Abbrechen</string>
     <string name="byletter_letters">ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <string name="pref_playback">Wiedergabe</string>
+    
+    <!-- Spracheinstellungen -->
+    <string name="pref_language">Anwendungssprache</string>
+    <string name="pref_language_header">Spracheinstellungen</string>
+    <string name="pref_language_summary">Sprache der Anwendung ändern</string>
+    
     <string name="pref_max_bitrate_title">Max. Streaming-Bitrate</string>
     <string name="settings_title">Einstellungen</string>
     <string name="chapters">Kapitel</string>

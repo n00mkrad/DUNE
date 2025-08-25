@@ -9,8 +9,13 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentActivity
 import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.ui.preference.screen.UserPreferencesScreen
+import org.jellyfin.androidtv.util.LocaleUtils
+import android.content.Context
 
 class PreferencesActivity : FragmentActivity(R.layout.fragment_content_view) {
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleUtils.wrapContext(newBase))
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         // Set the theme before super.onCreate
         setTheme(R.style.Theme_Jellyfin_Preferences)

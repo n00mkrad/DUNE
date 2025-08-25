@@ -240,6 +240,12 @@
     <string name="pref_libraries">Kirjastot</string>
     <string name="pref_home_description">Määritä näytettävät osiot</string>
     <string name="pref_theme">Teema</string>
+    
+    <!-- Language preference strings -->
+    <string name="pref_language">Sovelluksen kieli</string>
+    <string name="pref_language_header">Kieliasetukset</string>
+    <string name="pref_language_summary">Vaihda sovelluksen käyttämää kieltä</string>
+    
     <string name="pref_browsing">Selaus</string>
     <string name="pref_accounts">Tilit</string>
     <string name="pref_customization">Mukautus</string>

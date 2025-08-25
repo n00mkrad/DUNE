@@ -124,6 +124,12 @@
     <string name="settings_title">الإعدادات</string>
     <string name="pref_max_bitrate_title">أقصى معدل بت التدفق</string>
     <string name="pref_playback">التشغيل</string>
+    
+    <!-- إعدادات اللغة -->
+    <string name="pref_language">لغة التطبيق</string>
+    <string name="pref_language_header">إعدادات اللغة</string>
+    <string name="pref_language_summary">تغيير اللغة المستخدمة في التطبيق</string>
+    
     <string name="byletter_letters">أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي</string>
     <string name="btn_cancel">إلغاء</string>
     <string name="loading">جاري التحميل…</string>

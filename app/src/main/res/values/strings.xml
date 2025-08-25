@@ -374,7 +374,7 @@
     <string name="panel_title">Navigation</string>
     <string name="backdrop_settings_description">Customize backdrop appearance and behavior</string>
     <string name="pref_show_backdrop_description">Show backdrop images in the background of the app</string>
-    <string name="pref_backdrop_blur_description">Control the blur effect of backdrop images from 0% (no blur) to 100% (full blur)</string>
+    <string name="pref_backdrop_blur_description" formatted="false">Control the blur effect of backdrop images from 0% (no blur) to 100% (full blur)</string>
     <string name="lbl_remove_user_content">Remove account</string>
     <string name="lbl_sign_out_content">Requires login on next use</string>
     <string name="lbl_remove_server">Remove server</string>
@@ -741,6 +741,11 @@
     <string name="move_down">Move Down</string>
     <string name="enhanced_tweaks">Enhanced Tweaks</string>
     <string name="enhanced_tweaks_description">Backdrop Settings,Genre Rows,App Themes,And more...</string>
+    
+    <!-- Language preference strings -->
+    <string name="pref_language">App Language</string>
+    <string name="pref_language_header">Language Settings</string>
+    <string name="pref_language_summary">Change the language used in the app</string>
     <string name="home_content_description">Home screen content</string>
     <string name="lbl_music_videos">Music Videos</string>
 
