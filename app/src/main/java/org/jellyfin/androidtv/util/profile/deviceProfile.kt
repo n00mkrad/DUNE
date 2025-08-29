@@ -1,7 +1,5 @@
 package org.jellyfin.androidtv.util.profile
 
-import android.content.Context
-import android.os.Build
 import androidx.media3.common.MimeTypes
 import org.jellyfin.androidtv.constant.Codec
 import org.jellyfin.androidtv.preference.UserPreferences
@@ -12,10 +10,8 @@ import org.jellyfin.sdk.model.api.EncodingContext
 import org.jellyfin.sdk.model.api.MediaStreamProtocol
 import org.jellyfin.sdk.model.api.ProfileConditionValue
 import org.jellyfin.sdk.model.api.SubtitleDeliveryMethod
-import org.jellyfin.sdk.model.api.VideoRangeType
 import org.jellyfin.sdk.model.deviceprofile.DeviceProfileBuilder
 import org.jellyfin.sdk.model.deviceprofile.buildDeviceProfile
-import timber.log.Timber
 
 private val downmixSupportedAudioCodecs = arrayOf(
 	Codec.Audio.AAC,
@@ -23,29 +19,27 @@ private val downmixSupportedAudioCodecs = arrayOf(
 	Codec.Audio.MP3,
 )
 
-private fun getSupportedAudioCodecs(isAC3Enabled: Boolean): Array<String> {
-	// The fallback will be handled by the PlaybackManager
-	return arrayOf(
-		Codec.Audio.AAC,
-		Codec.Audio.AAC_LATM,
-		Codec.Audio.ALAC,
-		Codec.Audio.DCA,
-		Codec.Audio.DTS,
-		Codec.Audio.FLAC,
-		Codec.Audio.MLP,
-		Codec.Audio.MP2,
-		Codec.Audio.MP3,
-		Codec.Audio.OPUS,
-		Codec.Audio.PCM_ALAW,
-		Codec.Audio.PCM_MULAW,
-		Codec.Audio.PCM_S16LE,
-		Codec.Audio.PCM_S20LE,
-		Codec.Audio.PCM_S24LE,
-		Codec.Audio.TRUEHD,
-		Codec.Audio.VORBIS,
-		Codec.Audio.DTS)
-
-}
+private val supportedAudioCodecs = arrayOf(
+	Codec.Audio.AAC,
+	Codec.Audio.AAC_LATM,
+	Codec.Audio.AC3,
+	Codec.Audio.ALAC,
+	Codec.Audio.DCA,
+	Codec.Audio.DTS,
+	Codec.Audio.EAC3,
+	Codec.Audio.FLAC,
+	Codec.Audio.MLP,
+	Codec.Audio.MP2,
+	Codec.Audio.MP3,
+	Codec.Audio.OPUS,
+	Codec.Audio.PCM_ALAW,
+	Codec.Audio.PCM_MULAW,
+	Codec.Audio.PCM_S16LE,
+	Codec.Audio.PCM_S20LE,
+	Codec.Audio.PCM_S24LE,
+	Codec.Audio.TRUEHD,
+	Codec.Audio.VORBIS,
+)
 
 private fun UserPreferences.getMaxBitrate(): Int {
 	var maxBitrate = this[UserPreferences.maxBitrate].toIntOrNull()
@@ -57,12 +51,7 @@ private fun UserPreferences.getMaxBitrate(): Int {
 	return maxBitrate * 1_000_000
 }
 
-fun createDeviceProfile(
-	context: Context,
-	userPreferences: UserPreferences,
-	disableDirectPlay: Boolean = false,
-) = createDeviceProfile(
-	mediaTest = MediaCodecCapabilitiesTest(context),
+fun createDeviceProfile(userPreferences: UserPreferences, disableDirectPlay: Boolean) = createDeviceProfile(
 	maxBitrate = userPreferences.getMaxBitrate(),
 	disableDirectPlay = disableDirectPlay,
 	isAC3Enabled = userPreferences[UserPreferences.ac3Enabled],
@@ -71,29 +60,21 @@ fun createDeviceProfile(
 	pgsDirectPlay = userPreferences[UserPreferences.pgsDirectPlay],
 )
 
-/**
- * device profile for Jellyfin playback with specified parameters.
- * @param mediaTest Media codec capabilities test instance.
- * @param maxBitrate Maximum bitrate for playback.
- * @param disableDirectPlay Whether to disable direct play.
- * @param isAC3Enabled Whether AC3 audio is enabled.
- * @param downMixAudio Whether to downmix audio to stereo.
- * @param assDirectPlay Whether ASS subtitles can be directly played.
- * @param pgsDirectPlay Whether PGS subtitles can be directly played.
- * @return A configured DeviceProfile.
- */
 fun createDeviceProfile(
-	mediaTest: MediaCodecCapabilitiesTest,
 	maxBitrate: Int,
 	disableDirectPlay: Boolean,
 	isAC3Enabled: Boolean,
 	downMixAudio: Boolean,
 	assDirectPlay: Boolean,
-	pgsDirectPlay: Boolean,
+	pgsDirectPlay: Boolean
 ) = buildDeviceProfile {
-	val allowedAudioCodecs = if (downMixAudio) downmixSupportedAudioCodecs
-	else getSupportedAudioCodecs(isAC3Enabled)
+	val allowedAudioCodecs = when {
+		downMixAudio -> downmixSupportedAudioCodecs
+		!isAC3Enabled -> supportedAudioCodecs.filterNot { it == Codec.Audio.EAC3 || it == Codec.Audio.AC3 }.toTypedArray()
+		else -> supportedAudioCodecs
+	}
 
+	val mediaTest = MediaCodecCapabilitiesTest()
 	val supportsHevc = mediaTest.supportsHevc()
 	val supportsHevcMain10 = mediaTest.supportsHevcMain10()
 	val hevcMainLevel = mediaTest.getHevcMainLevel()
@@ -358,42 +339,6 @@ fun createDeviceProfile(
 		}
 	}
 
-	// HDR
-	codecProfile {
-		type = CodecType.VIDEO
-
-		conditions {
-			// Check HDR types in order of quality/priority
-			if (!mediaTest.supportsDolbyVision()) {
-				ProfileConditionValue.VIDEO_RANGE_TYPE notEquals VideoRangeType.DOVI.serialName
-			}
-
-			// Only check HDR10+ on Android 10+ (API 29+)
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !mediaTest.supportsHdr10Plus()) {
-				ProfileConditionValue.VIDEO_RANGE_TYPE notEquals VideoRangeType.HDR10_PLUS.serialName
-			}
-
-			if (!mediaTest.supportsHdr10()) {
-				ProfileConditionValue.VIDEO_RANGE_TYPE notEquals VideoRangeType.HDR10.serialName
-			}
-
-			if (!mediaTest.supportsHlg()) {
-				ProfileConditionValue.VIDEO_RANGE_TYPE notEquals VideoRangeType.HLG.serialName
-			}
-		}
-	}.let {
-		// Log HDR capabilities for debugging
-		mediaTest.logHdrCapabilities()
-
-		// Remove codec profile if all HDR types are supported
-		if (it.conditions.isEmpty()) {
-			Timber.d("All HDR formats are supported")
-			codecProfiles.remove(it)
-		} else {
-			Timber.d("HDR restrictions applied: ${it.conditions.size} conditions")
-		}
-	}
-
 	// Audio channel profile
 	codecProfile {
 		type = CodecType.VIDEO_AUDIO
@@ -420,10 +365,9 @@ fun createDeviceProfile(
 	subtitleProfile(Codec.Subtitle.PGS, embedded = pgsDirectPlay, encode = true)
 	subtitleProfile(Codec.Subtitle.PGSSUB, embedded = pgsDirectPlay, encode = true)
 
-	// ASS/SSA is supported via libass extension
+// ASS/SSA is supported via libass extension
 	subtitleProfile(Codec.Subtitle.ASS, encode = true, embedded = assDirectPlay, external = assDirectPlay)
 	subtitleProfile(Codec.Subtitle.SSA, encode = true, embedded = assDirectPlay, external = assDirectPlay)
-
 }
 
 // Little helper function to more easily define subtitle profiles

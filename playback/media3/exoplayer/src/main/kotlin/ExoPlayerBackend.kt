@@ -104,8 +104,6 @@ class ExoPlayerBackend(
 
 		ExoPlayer.Builder(context)
 			.setRenderersFactory(renderersFactory)
-
-
 			.setTrackSelector(DefaultTrackSelector(context).apply {
 				setParameters(buildUponParameters().apply {
 					setAudioOffloadPreferences(
@@ -113,6 +111,7 @@ class ExoPlayerBackend(
 							setAudioOffloadMode(TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_ENABLED)
 						}.build()
 					)
+					setAllowInvalidateSelectionsOnRendererCapabilitiesChange(true)
 				})
 			})
 			.setMediaSourceFactory(mediaSourceFactory)
@@ -193,7 +192,6 @@ class ExoPlayerBackend(
 					}
 				}
 			}
-
 
 			surfaceView.addView(subtitleView)
 		} else {

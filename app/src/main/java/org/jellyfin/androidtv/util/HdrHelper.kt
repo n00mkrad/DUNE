@@ -1,5 +1,6 @@
 package org.jellyfin.androidtv.util
 
+import android.content.Context
 import android.media.MediaCodecInfo
 import android.media.MediaCodecList
 import android.media.MediaFormat
@@ -53,7 +54,7 @@ object HdrHelper {
         val codecList = MediaCodecList(MediaCodecList.ALL_CODECS)
         for (codec in codecList.codecInfos) {
             if (codec.isEncoder) continue
-
+            
             for (mimeType in codec.supportedTypes) {
                 if (mimeType.equals(MIME_VIDEO_DOLBY_VISION, ignoreCase = true)) {
                     return true
@@ -82,10 +83,10 @@ object HdrHelper {
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun checkHdrSupport(mimeType: String, colorTransfer: Int): Boolean {
         val codecList = MediaCodecList(MediaCodecList.ALL_CODECS)
-
+        
         for (codec in codecList.codecInfos) {
             if (codec.isEncoder) continue
-
+            
             try {
                 for (type in codec.supportedTypes) {
                     if (type.equals(mimeType, ignoreCase = true)) {
@@ -101,7 +102,7 @@ object HdrHelper {
                                 ) {
                                     // For now, assume support if we find a matching codec with the right format
                                     // Note: We can't reliably check color transfer support on all Android versions
-                                    // This is a simplified check that might need adjustment based on specific device capab
+                                    // This is a simplified check that might need adjustment based on specific device capabilities
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                         // On Android Q+, we can check some basic HDR support
                                         if (colorTransfer == MediaFormat.COLOR_TRANSFER_HLG ||
@@ -125,7 +126,7 @@ object HdrHelper {
                 Timber.e(e, "Error checking HDR support for codec: ${codec.name}")
             }
         }
-
+        
         return false
     }
 

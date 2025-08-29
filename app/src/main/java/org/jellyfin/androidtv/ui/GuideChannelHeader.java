@@ -82,7 +82,7 @@ public class GuideChannelHeader extends RelativeLayout {
             setBackgroundResource(R.drawable.channel_guide_focused_background);
             mTvGuide.setSelectedProgram(this);
         } else {
-            setBackground(ContextCompat.getDrawable(mContext, R.drawable.card_focused_border));
+            setBackground(ContextCompat.getDrawable(mContext, R.drawable.light_border));
         }
     }
 }

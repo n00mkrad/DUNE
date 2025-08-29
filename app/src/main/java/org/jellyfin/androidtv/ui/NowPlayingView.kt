@@ -105,7 +105,7 @@ fun NowPlayingComposable(
 							AsyncImage(
 								url = image?.getUrl(api),
 								blurHash = image?.blurHash,
-								placeholder = ContextCompat.getDrawable(LocalContext.current, R.drawable.ic_albums),
+								placeholder = ContextCompat.getDrawable(LocalContext.current, R.drawable.ic_album),
 								aspectRatio = image?.aspectRatio ?: 1f,
 								modifier = Modifier
 									.size(35.dp)
