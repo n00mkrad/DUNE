@@ -9,8 +9,10 @@ import org.jellyfin.androidtv.preference.constant.AudioBehavior
 import org.jellyfin.androidtv.preference.constant.ClockBehavior
 import org.jellyfin.androidtv.preference.constant.NextUpBehavior
 import org.jellyfin.androidtv.preference.constant.RatingType
-import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.preference.constant.RefreshRateSwitchingBehavior
+import org.jellyfin.androidtv.preference.constant.SubtitleLanguage
+import org.jellyfin.androidtv.preference.UserPreferences.Companion.screensaverInAppEnabled
+import org.jellyfin.androidtv.preference.constant.AudioLanguage
 import org.jellyfin.androidtv.preference.constant.WatchedIndicatorBehavior
 import org.jellyfin.androidtv.preference.constant.ZoomMode
 import org.jellyfin.androidtv.ui.playback.segment.MediaSegmentAction
@@ -22,6 +24,7 @@ import org.jellyfin.preference.intPreference
 import org.jellyfin.preference.longPreference
 import org.jellyfin.preference.store.SharedPreferenceStore
 import org.jellyfin.preference.stringPreference
+import org.jellyfin.androidtv.R
 import org.jellyfin.sdk.model.api.MediaSegmentType
 import kotlin.time.Duration.Companion.minutes
 
@@ -35,29 +38,32 @@ class UserPreferences(context: Context) : SharedPreferenceStore(
 	sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 ) {
 
-    companion object {
-        /**
-         * App language preference
-         * Uses the device default if not set
-         */
-        var appLanguage = enumPreference("app_language", AppLanguage.SYSTEM_DEFAULT)
+	companion object {
+		/**
+		 * App language preference
+		 * Uses the device default if not set
+		 */
+		var appLanguage = enumPreference("app_language", AppLanguage.SYSTEM_DEFAULT)
 
-
-        var imageQuality = stringPreference("image_quality", "low")
-        /**
-         * Select the app theme
-         */
-        var appTheme = enumPreference("app_theme", AppTheme.FLEXY)
+		/* Display */
+		/**
+		 * Image quality preference: low, normal, high
+		 */
+		var imageQuality = stringPreference("image_quality", "low")
+		/**
+		 * Select the app theme
+		 */
+		var appTheme = enumPreference("app_theme", AppTheme.FLEXY)
 
 		/**
 		 * Enable background images while browsing
 		 */
 		var backdropEnabled = booleanPreference("pref_show_backdrop", true)
 
-        /**
-         * Backdrop blur intensity from 0.0 (no blur) to 1.0 (full blur)
-         */
-        var backdropBlurIntensity = floatPreference("pref_backdrop_blur_intensity", 0.0f)
+		/**
+		 * Backdrop blur intensity from 0.0 (no blur) to 1.0 (full blur)
+		 */
+		var backdropBlurIntensity = floatPreference("pref_backdrop_blur_intensity", 0.0f)
 
 		/**
 		 * Backdrop dimming intensity from 0 (no dimming) to 1.0 (full black)
@@ -68,6 +74,12 @@ class UserPreferences(context: Context) : SharedPreferenceStore(
 		 * Backdrop fading intensity from 0 (no fade) to 1.0 (full fade)
 		 */
 		var backdropFadingIntensity = floatPreference("pref_backdrop_fading_intensity", 0.7f)
+
+		/**
+		 * Card size for home screen and library browsing
+		 * Values: "small", "medium", "large"
+		 */
+		var cardSize = stringPreference("card_size", "small")
 
 		/**
 		 * Show premieres on home screen
@@ -216,20 +228,30 @@ class UserPreferences(context: Context) : SharedPreferenceStore(
 		var subtitleTextStrokeColor = longPreference("subtitles_text_stroke_color", 0xFF000000)
 
 		/**
-		 * Subtitles font size
+		 * Subtitles font size (1.0f = 100%)
 		 */
-		var subtitlesTextSize = floatPreference("subtitles_text_size", 1f)
+		var subtitlesTextSize = floatPreference("subtitles_text_size", 1.0f)
 
+		/**
+		 * Subtitles text weight value (400 = normal, 700 = bold)
+		 */
+		var subtitlesTextWeightValue = intPreference("subtitles_text_weight_value", 400)
 
-        /**
-         * Subtitles bold text
-         */
-        var subtitlesTextWeightValue = intPreference("subtitles_text_weight_value", 400)
+		/**
+		 * Default subtitle language
+		 * Default is set to English
+		 */
+		var defaultSubtitleLanguage = enumPreference("default_subtitle_language", SubtitleLanguage.ENGLISH)
 
+		/**
+		 * Default audio language 
+		 * Default is set to English
+		 */
+		var defaultAudioLanguage = enumPreference("default_audio_language", AudioLanguage.ENGLISH)
 
-    /**
-     * Show screensaver in app
-     */
+		/**
+		 * Show screensaver in app
+		 */
 		var screensaverInAppEnabled = booleanPreference("screensaver_inapp_enabled", true)
 
 		/**
@@ -278,12 +300,7 @@ class UserPreferences(context: Context) : SharedPreferenceStore(
 		 */
 		var preloadImages = booleanPreference("preload_images", true)
 
-        /**
-         * Default audio language preference (empty string means use best guess)
-         * Values are ISO 639-2 language codes
-         */
-        var defaultAudioLanguage = stringPreference("default_audio_language", "")
-    }
+	}
 
 	init {
 		// Note: Create a single migration per app version

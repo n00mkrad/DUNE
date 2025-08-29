@@ -24,34 +24,38 @@ class LanguagePreferencesScreen : OptionsFragment() {
             // Save to SharedPreferences directly to ensure it's persisted
             val prefs = requireContext().getSharedPreferences("org.jellyfin.androidtv.preferences", Context.MODE_PRIVATE)
             prefs.edit().putString("app_language", newLanguage.code).apply()
-
+            
+            // Also save through userPreferences for consistency
             userPreferences[UserPreferences.appLanguage] = newLanguage
-
+            
+            // Force commit to ensure the preference is written to disk
             prefs.edit().commit()
-
+            
             // Restart the app to apply the new language
             activity?.let { activity ->
-
+                // Create an intent to restart the app
                 val packageManager = activity.packageManager
                 val intent = packageManager.getLaunchIntentForPackage(activity.packageName)
                 val componentName = intent?.component
-
+                
+                // Create a fresh task with the launcher activity
                 val mainIntent = Intent.makeRestartActivityTask(componentName)
-
+                
+                // Add flags to clear the back stack and create a new task
                 mainIntent.addFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK or
                     Intent.FLAG_ACTIVITY_CLEAR_TASK or
                     Intent.FLAG_ACTIVITY_CLEAR_TOP or
                     Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
                 )
-
-                // delay
+                
+                // Add a small delay to ensure the activity is properly finished
                 Handler(Looper.getMainLooper()).postDelayed({
                     try {
                         // Start the new activity
                         activity.startActivity(mainIntent)
-
-                        // Restart
+                        
+                        // Kill the current process to ensure a clean restart
                         android.os.Process.killProcess(android.os.Process.myPid())
                         System.exit(0)
                     } catch (e: Exception) {
@@ -59,9 +63,9 @@ class LanguagePreferencesScreen : OptionsFragment() {
                     }
                 }, 200)
             }
-
+            
         } catch (e: Exception) {
-            // log errors
+            // Only log errors
         }
     }
 
@@ -71,7 +75,7 @@ class LanguagePreferencesScreen : OptionsFragment() {
         category {
             enum<AppLanguage> {
                 setTitle(R.string.pref_language)
-
+                
                 bind {
                     get { userPreferences[UserPreferences.appLanguage] }
                     set { newLanguage ->

@@ -58,13 +58,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
 import io.github.peerless2012.ass.media.AssHandler;
+import io.github.peerless2012.ass.media.factory.AssRenderersFactory;
 import io.github.peerless2012.ass.media.kt.AssPlayerKt;
 import io.github.peerless2012.ass.media.parser.AssSubtitleParserFactory;
 import io.github.peerless2012.ass.media.type.AssRenderType;
-import io.github.peerless2012.ass.media.factory.AssRenderersFactory;
 import io.github.peerless2012.ass.media.widget.AssSubtitleView;
-
 import timber.log.Timber;
 
 @OptIn(markerClass = UnstableApi.class)
@@ -127,10 +127,12 @@ public class VideoManager {
         );
         mExoPlayerView.getSubtitleView().setFractionalTextSize(0.0533f * userPreferences.get(UserPreferences.Companion.getSubtitlesTextSize()));
         mExoPlayerView.getSubtitleView().setStyle(subtitleStyle);
+
         if (assHandler != null) {
             assHandler.init(mExoPlayer);
             mExoPlayerView.getSubtitleView().addView(new AssSubtitleView(mActivity, assHandler));
         }
+
         mExoPlayer.addListener(new Player.Listener() {
             @Override
             public void onPlayerError(@NonNull PlaybackException error) {
@@ -209,7 +211,7 @@ public class VideoManager {
      * @param context The associated context
      * @return A configured builder for Exoplayer
      */
-    private ExoPlayer.Builder configureExoplayerBuilder(Context context, AssHandler assHandler) {
+    private ExoPlayer.Builder configureExoplayerBuilder(Context context, AssHandler assHandler){
         ExoPlayer.Builder exoPlayerBuilder = new ExoPlayer.Builder(context);
         DefaultRenderersFactory defaultRendererFactory = new DefaultRenderersFactory(context);
         defaultRendererFactory.setEnableDecoderFallback(true);
@@ -240,6 +242,7 @@ public class VideoManager {
             exoPlayerBuilder.setRenderersFactory(defaultRendererFactory);
             exoPlayerBuilder.setMediaSourceFactory(new DefaultMediaSourceFactory(dataSourceFactory, extractorsFactory));
         }
+
         return exoPlayerBuilder;
     }
 

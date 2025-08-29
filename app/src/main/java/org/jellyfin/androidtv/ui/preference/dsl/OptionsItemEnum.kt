@@ -3,6 +3,7 @@ package org.jellyfin.androidtv.ui.preference.dsl
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.preference.PreferenceCategory
+import org.jellyfin.androidtv.preference.constant.SubtitleLanguage
 import org.jellyfin.androidtv.ui.preference.custom.RichListPreference
 import org.jellyfin.preference.Preference
 import org.jellyfin.preference.PreferenceEnum
@@ -30,6 +31,7 @@ class OptionsItemEnum<T : Enum<T>>(
 			when {
 				entry is PreferenceEnum && entry.hidden -> null
 				entry is PreferenceEnum && entry.nameRes != -1 -> Pair(entry, context.getString(entry.nameRes))
+				entry is SubtitleLanguage -> Pair(entry, (entry as SubtitleLanguage).displayName)
 				else -> Pair(entry, entry.name)
 			}
 		}?.toMap().orEmpty()

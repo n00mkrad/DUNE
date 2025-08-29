@@ -1,5 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Audio Language -->
+    <string-array name="pref_audio_language_entries">
+        <item>@string/pref_audio_language_none</item>
+        <item>@string/pref_subtitle_language_ara</item>
+        <item>@string/pref_subtitle_language_zho</item>
+        <item>@string/pref_subtitle_language_ces</item>
+        <item>@string/pref_subtitle_language_dan</item>
+        <item>@string/pref_subtitle_language_nld</item>
+        <item>@string/pref_subtitle_language_eng</item>
+        <item>@string/pref_subtitle_language_fin</item>
+        <item>@string/pref_subtitle_language_fra</item>
+        <item>@string/pref_subtitle_language_deu</item>
+        <item>@string/pref_subtitle_language_ell</item>
+        <item>@string/pref_subtitle_language_heb</item>
+        <item>@string/pref_subtitle_language_hin</item>
+        <item>@string/pref_subtitle_language_hun</item>
+        <item>@string/pref_subtitle_language_ind</item>
+        <item>@string/pref_subtitle_language_ita</item>
+        <item>@string/pref_subtitle_language_jpn</item>
+        <item>@string/pref_subtitle_language_kor</item>
+        <item>@string/pref_subtitle_language_msa</item>
+        <item>@string/pref_subtitle_language_nor</item>
+        <item>@string/pref_subtitle_language_pol</item>
+        <item>@string/pref_subtitle_language_por</item>
+        <item>@string/pref_subtitle_language_ron</item>
+        <item>@string/pref_subtitle_language_rus</item>
+        <item>@string/pref_subtitle_language_slk</item>
+        <item>@string/pref_subtitle_language_spa</item>
+        <item>@string/pref_subtitle_language_swe</item>
+        <item>@string/pref_subtitle_language_tha</item>
+        <item>@string/pref_subtitle_language_tur</item>
+        <item>@string/pref_subtitle_language_ukr</item>
+        <item>@string/pref_subtitle_language_vie</item>
+    </string-array>
+
+    <string-array name="pref_audio_language_values">
+        <item></item> <!-- None/Default -->
+        <item>ara</item>
+        <item>zho</item>
+        <item>ces</item>
+        <item>dan</item>
+        <item>nld</item>
+        <item>eng</item>
+        <item>fin</item>
+        <item>fra</item>
+        <item>deu</item>
+        <item>ell</item>
+        <item>heb</item>
+        <item>hin</item>
+        <item>hun</item>
+        <item>ind</item>
+        <item>ita</item>
+        <item>jpn</item>
+        <item>kor</item>
+        <item>msa</item>
+        <item>nor</item>
+        <item>pol</item>
+        <item>por</item>
+        <item>ron</item>
+        <item>rus</item>
+        <item>slk</item>
+        <item>spa</item>
+        <item>swe</item>
+        <item>tha</item>
+        <item>tur</item>
+        <item>ukr</item>
+        <item>vie</item>
+    </string-array>
+
+    <!-- Subtitle Language -->
+    <string-array name="pref_subtitle_language_entries">
+        <item>@string/pref_subtitle_language_none</item>
+        <item>@string/pref_subtitle_language_ara</item>
+        <item>@string/pref_subtitle_language_zho</item>
+        <item>@string/pref_subtitle_language_ces</item>
+        <item>@string/pref_subtitle_language_dan</item>
+        <item>@string/pref_subtitle_language_nld</item>
+        <item>@string/pref_subtitle_language_eng</item>
+        <item>@string/pref_subtitle_language_fin</item>
+        <item>@string/pref_subtitle_language_fra</item>
+        <item>@string/pref_subtitle_language_deu</item>
+        <item>@string/pref_subtitle_language_ell</item>
+        <item>@string/pref_subtitle_language_heb</item>
+        <item>@string/pref_subtitle_language_hin</item>
+        <item>@string/pref_subtitle_language_hun</item>
+        <item>@string/pref_subtitle_language_ind</item>
+        <item>@string/pref_subtitle_language_ita</item>
+        <item>@string/pref_subtitle_language_jpn</item>
+        <item>@string/pref_subtitle_language_kor</item>
+        <item>@string/pref_subtitle_language_msa</item>
+        <item>@string/pref_subtitle_language_nor</item>
+        <item>@string/pref_subtitle_language_pol</item>
+        <item>@string/pref_subtitle_language_por</item>
+        <item>@string/pref_subtitle_language_ron</item>
+        <item>@string/pref_subtitle_language_rus</item>
+        <item>@string/pref_subtitle_language_slk</item>
+        <item>@string/pref_subtitle_language_spa</item>
+        <item>@string/pref_subtitle_language_swe</item>
+        <item>@string/pref_subtitle_language_tha</item>
+        <item>@string/pref_subtitle_language_tur</item>
+        <item>@string/pref_subtitle_language_ukr</item>
+        <item>@string/pref_subtitle_language_vie</item>
+    </string-array>
+
+    <string-array name="pref_subtitle_language_values">
+        <item></item> <!-- None/Default -->
+        <item>ara</item>
+        <item>zho</item>
+        <item>ces</item>
+        <item>dan</item>
+        <item>nld</item>
+        <item>eng</item>
+        <item>fin</item>
+        <item>fra</item>
+        <item>deu</item>
+        <item>ell</item>
+        <item>heb</item>
+        <item>hin</item>
+        <item>hun</item>
+        <item>ind</item>
+        <item>ita</item>
+        <item>jpn</item>
+        <item>kor</item>
+        <item>msa</item>
+        <item>nor</item>
+        <item>pol</item>
+        <item>por</item>
+        <item>ron</item>
+        <item>rus</item>
+        <item>slk</item>
+        <item>spa</item>
+        <item>swe</item>
+        <item>tha</item>
+        <item>tur</item>
+        <item>ukr</item>
+        <item>vie</item>
+    </string-array>
+
+    
     <string-array name="image_quality_entries">
         <item>Low</item>
         <item>Normal</item>
