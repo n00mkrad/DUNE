@@ -38,26 +38,26 @@ class ThemeViewModel : ViewModel() {
  * Do not call during resume if the activity may not be recreated (like in the video player).
  */
 fun FragmentActivity.applyTheme() {
-    val viewModel by viewModels<ThemeViewModel>()
-    val userPreferences by inject<UserPreferences>()
-    val newTheme = userPreferences[UserPreferences.appTheme]
+	val viewModel by viewModels<ThemeViewModel>()
+	val userPreferences by inject<UserPreferences>()
+	val newTheme = userPreferences[UserPreferences.appTheme]
 
-    // Always set the theme, but only recreate if it's changed
-    if (newTheme != viewModel.theme) {
-        Timber.i("Theme changed from ${viewModel.theme} to $newTheme, applying...")
-        viewModel.theme = newTheme
-        setTheme(newTheme.style)
+	// Always set the theme, but only recreate if it's changed
+	if (newTheme != viewModel.theme) {
+		Timber.i("Theme changed from ${viewModel.theme} to $newTheme, applying...")
+		viewModel.theme = newTheme
+		setTheme(newTheme.style)
 
-        // Only recreate if we're not in the middle of creating the activity
-        if (!isFinishing && !isDestroyed) {
-            window.decorView.post {
-                if (!isFinishing && !isDestroyed) {
-                    recreate()
-                }
-            }
-        }
-    } else {
-        // Just apply the theme without recreation if it's already set
-        setTheme(newTheme.style)
-    }
+		// Only recreate if we're not in the middle of creating the activity
+		if (!isFinishing && !isDestroyed) {
+			window.decorView.post {
+				if (!isFinishing && !isDestroyed) {
+					recreate()
+				}
+			}
+		}
+	} else {
+		// Just apply the theme without recreation if it's already set
+		setTheme(newTheme.style)
+	}
 }

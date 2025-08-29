@@ -67,7 +67,11 @@ val defaultDeviceInfo = named("defaultDeviceInfo")
 
 val appModule = module {
 	// Online Subtitles dependencies
-	// to be added later
+
+
+
+
+
 
 
 	// New SDK
@@ -112,14 +116,14 @@ val appModule = module {
 		ImageLoader.Builder(context).apply {
 			serviceLoaderEnabled(false)
 			logger(CoilTimberLogger(if (BuildConfig.DEBUG) Logger.Level.Warn else Logger.Level.Error))
-
+			
 			// Configure memory cache
 			memoryCache {
 				coil3.memory.MemoryCache.Builder()
 					.maxSizeBytes(memoryCacheSize)
 					.build()
 			}
-
+			
 			// Set disk cache
 			diskCache(diskCache)
 

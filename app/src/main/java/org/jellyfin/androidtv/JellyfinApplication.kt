@@ -31,102 +31,104 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 private val appModule = module {
-    // Define your modules here
+	// Define your modules here
 }
 
 @Suppress("unused")
 class JellyfinApplication : Application() {
-    private lateinit var userPreferences: UserPreferences
-    private lateinit var notificationsRepository: NotificationsRepository
-    private var appContext: Context? = null
+	private lateinit var userPreferences: UserPreferences
+	private lateinit var notificationsRepository: NotificationsRepository
+	private var appContext: Context? = null
 
-    override fun onCreate() {
-        super.onCreate()
+	override fun onCreate() {
+		super.onCreate()
 
-        // Store application context
-        appContext = applicationContext
+		// Store application context
+		appContext = applicationContext
 
-        // Don't run in ACRA service
-        if (ACRA.isACRASenderServiceProcess()) return
+		// Don't run in ACRA service
+		if (ACRA.isACRASenderServiceProcess()) return
 
-        // Initialize Timber for logging in debug builds
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
-        }
+		// Initialize Timber for logging in debug builds
+		if (BuildConfig.DEBUG) {
+			Timber.plant(Timber.DebugTree())
+		}
 
-        // Initialize Koin
-        try {
-            startKoin {
-                androidContext(this@JellyfinApplication)
-                modules(appModule)
-            }
+		// Initialize Koin
+		try {
+			startKoin {
+				androidContext(this@JellyfinApplication)
+				modules(appModule)
+			}
 
-            // Initialize dependencies
-            userPreferences = get()
-            notificationsRepository = get()
+			// Initialize dependencies
+			userPreferences = get()
+			notificationsRepository = get()
 
-            applyLanguage()
+			// Apply language configuration
+			applyLanguage()
 
-            notificationsRepository.addDefaultNotifications()
-        } catch (e: Exception) {
-            if (BuildConfig.DEBUG) Timber.e(e, "Error during application setup")
-        }
-    }
+			// Add default notifications
+			notificationsRepository.addDefaultNotifications()
+		} catch (e: Exception) {
+			if (BuildConfig.DEBUG) Timber.e(e, "Error during application setup")
+		}
+	}
 
 
-    /**
-     * Apply the selected language to the app context
-     */
-    private fun applyLanguage() {
-        if (!::userPreferences.isInitialized) return
+	/**
+	 * Apply the selected language to the app context
+	 */
+	private fun applyLanguage() {
+		if (!::userPreferences.isInitialized) return
 
-        try {
-            val language = userPreferences[UserPreferences.appLanguage]
-            val locale = when (language) {
-                AppLanguage.SYSTEM_DEFAULT -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        LocaleList.getDefault().get(0)
-                    } else {
-                        @Suppress("DEPRECATION")
-                        Locale.getDefault()
-                    }
-                }
-                else -> when (language.code) {
-                    "zh-rCN" -> Locale("zh", "CN")
-                    "zh-rTW" -> Locale("zh", "TW")
-                    else -> Locale(language.code)
-                }
-            }
+		try {
+			val language = userPreferences[UserPreferences.appLanguage]
+			val locale = when (language) {
+				AppLanguage.SYSTEM_DEFAULT -> {
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+						LocaleList.getDefault().get(0)
+					} else {
+						@Suppress("DEPRECATION")
+						Locale.getDefault()
+					}
+				}
+				else -> when (language.code) {
+					"zh-rCN" -> Locale("zh", "CN")
+					"zh-rTW" -> Locale("zh", "TW")
+					else -> Locale(language.code)
+				}
+			}
 
-            Locale.setDefault(locale)
-            val config = Configuration(resources.configuration)
+			Locale.setDefault(locale)
+			val config = Configuration(resources.configuration)
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                val localeList = LocaleList(locale)
-                LocaleList.setDefault(localeList)
-                config.setLocales(localeList)
-                config.setLocale(locale)
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+				val localeList = LocaleList(locale)
+				LocaleList.setDefault(localeList)
+				config.setLocales(localeList)
+				config.setLocale(locale)
 
-                createConfigurationContext(config)
-                resources.updateConfiguration(config, resources.displayMetrics)
-                applicationContext.createConfigurationContext(config)
-            } else {
-                @Suppress("DEPRECATION")
-                config.locale = locale
-                resources.updateConfiguration(config, resources.displayMetrics)
+				createConfigurationContext(config)
+				resources.updateConfiguration(config, resources.displayMetrics)
+				applicationContext.createConfigurationContext(config)
+			} else {
+				@Suppress("DEPRECATION")
+				config.locale = locale
+				resources.updateConfiguration(config, resources.displayMetrics)
 
-                val context = applicationContext
-                val resources = context.resources
-                val configuration = resources.configuration
-                configuration.locale = locale
-                resources.updateConfiguration(configuration, resources.displayMetrics)
-            }
+				val context = applicationContext
+				val resources = context.resources
+				val configuration = resources.configuration
+				configuration.locale = locale
+				resources.updateConfiguration(configuration, resources.displayMetrics)
+			}
 
-            Locale.setDefault(locale)
-        } catch (e: Exception) {
-            if (BuildConfig.DEBUG) Timber.e(e, "Failed to apply language settings")
-        }
-    }
+			Locale.setDefault(locale)
+		} catch (e: Exception) {
+			if (BuildConfig.DEBUG) Timber.e(e, "Failed to apply language settings")
+		}
+	}
 
 	/**
 	 * Called from the StartupActivity when the user session is started.
@@ -155,59 +157,65 @@ class JellyfinApplication : Application() {
 	}
 
 	override fun attachBaseContext(base: Context) {
-        val prefs = base.getSharedPreferences("org.jellyfin.androidtv.preferences", Context.MODE_PRIVATE)
-        val savedLanguageCode = prefs.getString("app_language", null)
+		// Get the saved language preference directly from SharedPreferences
+		val prefs = base.getSharedPreferences("org.jellyfin.androidtv.preferences", Context.MODE_PRIVATE)
+		val savedLanguageCode = prefs.getString("app_language", null)
 
-        // fallback
-        val locale = when {
-            !savedLanguageCode.isNullOrEmpty() && savedLanguageCode != "system" -> when (savedLanguageCode) {
-                "zh-rCN" -> Locale("zh", "CN")
-                "zh-rTW" -> Locale("zh", "TW")
-                else -> Locale(savedLanguageCode)
-            }
-            else -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                LocaleList.getDefault().get(0)
-            } else {
-                @Suppress("DEPRECATION")
-                Locale.getDefault()
-            }
-        }
+		// Create locale based on saved preference or fall back to system default
+		val locale = when {
+			!savedLanguageCode.isNullOrEmpty() && savedLanguageCode != "system" -> when (savedLanguageCode) {
+				"zh-rCN" -> Locale("zh", "CN")
+				"zh-rTW" -> Locale("zh", "TW")
+				else -> Locale(savedLanguageCode)
+			}
+			else -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+				LocaleList.getDefault().get(0)
+			} else {
+				@Suppress("DEPRECATION")
+				Locale.getDefault()
+			}
+		}
 
-        // Set the default locale
-        Locale.setDefault(locale)
+		// Set the default locale
+		Locale.setDefault(locale)
 
-        val config = Configuration()
+		// Create configuration with the selected locale
+		val config = Configuration()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            // For Android 7.0+ (API 24+)
-            config.setLocale(locale)
-            config.setLocales(LocaleList(locale))
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+			// For Android 7.0+ (API 24+)
+			config.setLocale(locale)
+			config.setLocales(LocaleList(locale))
 
-            val context = base.createConfigurationContext(config)
-            super.attachBaseContext(context)
+			// Apply the configuration to the base context
+			val context = base.createConfigurationContext(config)
+			super.attachBaseContext(context)
 
-            val resources = context.resources
-            resources.updateConfiguration(config, resources.displayMetrics)
+			// Update the resources configuration
+			val resources = context.resources
+			resources.updateConfiguration(config, resources.displayMetrics)
 
-            Timber.d("Applied locale configuration (API 24+): $locale")
-        } else {
-            // For older Android versions
-            @Suppress("DEPRECATION")
-            config.locale = locale
+			Timber.d("Applied locale configuration (API 24+): $locale")
+		} else {
+			// For older Android versions
+			@Suppress("DEPRECATION")
+			config.locale = locale
 
-            val context = base.createConfigurationContext(config)
-            super.attachBaseContext(context)
+			// Apply the configuration to the base context
+			val context = base.createConfigurationContext(config)
+			super.attachBaseContext(context)
 
-            val resources = context.resources
-            @Suppress("DEPRECATION")
-            resources.updateConfiguration(config, resources.displayMetrics)
+			// Update the resources configuration
+			val resources = context.resources
+			@Suppress("DEPRECATION")
+			resources.updateConfiguration(config, resources.displayMetrics)
 
-            Timber.d("Applied locale configuration (legacy): $locale")
-        }
+			Timber.d("Applied locale configuration (legacy): $locale")
+		}
 
-        // Initialize telemetry (don't access Koin here)
-        TelemetryService.init(this)
+		// Initialize telemetry (don't access Koin here)
+		TelemetryService.init(this)
 
-        Timber.d("attachBaseContext completed. Current locale: ${Locale.getDefault()}")
-    }
+		Timber.d("attachBaseContext completed. Current locale: ${Locale.getDefault()}")
+	}
 }

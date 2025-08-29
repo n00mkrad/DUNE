@@ -125,8 +125,7 @@ public class ItemListFragment extends Fragment implements View.OnKeyListener {
                 row.getLocationOnScreen(location);
                 int y = location[1];
                 if (y > mBottomScrollThreshold) {
-                     // too close to bottom - scroll down
-                    Timber.d("Scrolling view by %d pixels to keep row in center", y - mBottomScrollThreshold);
+                    // too close to bottom - scroll down
                     mScrollView.smoothScrollBy(0, y - mBottomScrollThreshold);
                 }
             }

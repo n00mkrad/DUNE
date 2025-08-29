@@ -101,15 +101,15 @@ class PlaybackAdvancedPreferencesScreen : OptionsFragment() {
 				bind(userPreferences, UserPreferences.useExternalPlayer)
 			}
 
-		category {
-			setTitle(R.string.pref_live_tv_cat)
+			category {
+				setTitle(R.string.pref_live_tv_cat)
 
-			checkbox {
-				setTitle(R.string.lbl_direct_stream_live)
-				bind(userPreferences, UserPreferences.liveTvDirectPlayEnabled)
-				setContent(R.string.pref_direct_stream_live_on, R.string.pref_direct_stream_live_off)
+				checkbox {
+					setTitle(R.string.lbl_direct_stream_live)
+					bind(userPreferences, UserPreferences.liveTvDirectPlayEnabled)
+					setContent(R.string.pref_direct_stream_live_on, R.string.pref_direct_stream_live_off)
+				}
 			}
-		}
 		}
 
 		category {
@@ -128,21 +128,21 @@ class PlaybackAdvancedPreferencesScreen : OptionsFragment() {
 				bind(userPreferences, UserPreferences.ac3Enabled)
 			}
 		}
-			category {
-				setTitle(R.string.pref_Subtitle_Codecs)
+		category {
+			setTitle(R.string.pref_Subtitle_Codecs)
 
-				checkbox {
-					setTitle(R.string.preference_enable_pgs)
-					bind(userPreferences, UserPreferences.pgsDirectPlay)
-				}
-
-				checkbox {
-					setTitle(R.string.preference_enable_assDirectPlay)
-					setContent(R.string.preference_enable_assDirectPlay_description)
-
-					bind(userPreferences, UserPreferences.assDirectPlay)
-				}
+			checkbox {
+				setTitle(R.string.preference_enable_pgs)
+				bind(userPreferences, UserPreferences.pgsDirectPlay)
 			}
+
+			checkbox {
+				setTitle(R.string.preference_enable_assDirectPlay)
+				setContent(R.string.preference_enable_assDirectPlay_description)
+
+				bind(userPreferences, UserPreferences.assDirectPlay)
+			}
+		}
 
 		category {
 			setTitle(R.string.pref_troubleshooting)

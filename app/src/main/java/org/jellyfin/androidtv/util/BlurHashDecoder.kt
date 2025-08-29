@@ -1,4 +1,5 @@
 package org.jellyfin.androidtv.util
+
 import android.graphics.Bitmap
 import android.graphics.Color
 import kotlin.math.PI
@@ -6,14 +7,15 @@ import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.withSign
 
-// BlurHash decoder for generating placeholder bitmaps
 @Suppress("MagicNumber", "NestedBlockDepth")
 object BlurHashDecoder {
 	private const val CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz#$%*+,-.:;=?@[]^_{|}~"
 
+	/**
+	 * Decode a blur hash into a new bitmap.
+	 */
 	fun decode(blurHash: String?, width: Int, height: Int, punch: Float = 1f): Bitmap? {
 		if (blurHash == null || blurHash.length < 6) return null
-		if (width <= 0 || height <= 0) return null
 
 		val numCompEnc = decode83(blurHash, 0, 1)
 		val numCompX = (numCompEnc % 9) + 1

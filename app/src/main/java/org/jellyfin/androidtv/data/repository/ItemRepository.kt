@@ -1,8 +1,7 @@
 package org.jellyfin.androidtv.data.repository
-import org.jellyfin.sdk.model.api.ItemFields
-import timber.log.Timber
 
-// Repository defining item fields for Jellyfin API queries
+import org.jellyfin.sdk.model.api.ItemFields
+
 object ItemRepository {
 	val itemFields = setOf(
 		ItemFields.CAN_DELETE,
@@ -24,8 +23,4 @@ object ItemRepository {
 		ItemFields.TAGLINES,
 		ItemFields.TRICKPLAY,
 	)
-
-	init {
-		Timber.d("Initializing ItemRepository with %d item fields", itemFields.size)
-	}
 }

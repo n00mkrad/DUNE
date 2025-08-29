@@ -1,4 +1,5 @@
 package org.jellyfin.androidtv.ui.browsing.composable.inforow
+
 import android.content.Context
 import android.util.AttributeSet
 import androidx.compose.foundation.layout.Arrangement
@@ -38,7 +39,6 @@ import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit
 import kotlin.time.Duration
 
-// Info row composables for displaying item metadata
 @Composable
 fun InfoRowDate(
 	item: BaseItemDto,
@@ -380,51 +380,54 @@ fun BaseItemInfoRow(
 	}
 }
 
+/**
+ * Exposes the [BaseItemInfoRow] composable as Android view.
+ */
 class BaseItemInfoRowView @JvmOverloads constructor(
-	context: Context,
-	attrs: AttributeSet? = null,
+    context: Context,
+    attrs: AttributeSet? = null,
 ) : AbstractComposeView(context, attrs) {
-	private val _item = MutableStateFlow<BaseItemDto?>(null)
-	private val _mediaSource = MutableStateFlow<MediaSourceInfo?>(null)
-	private val _includeRuntime = MutableStateFlow(false)
-	private val _showMediaDetails = MutableStateFlow(false)
+    private val _item = MutableStateFlow<BaseItemDto?>(null)
+    private val _mediaSource = MutableStateFlow<MediaSourceInfo?>(null)
+    private val _includeRuntime = MutableStateFlow(false)
+    private val _showMediaDetails = MutableStateFlow(false)
 
-	var item: BaseItemDto?
-		get() = _item.value
-		set(value) {
-			_item.value = value
-		}
+    var item: BaseItemDto?
+        get() = _item.value
+        set(value) {
+            _item.value = value
+        }
 
-	var mediaSource: MediaSourceInfo?
-		get() = _mediaSource.value
-		set(value) {
-			_mediaSource.value = value
-		}
+    var mediaSource: MediaSourceInfo?
+        get() = _mediaSource.value
+        set(value) {
+            _mediaSource.value = value
+        }
 
-	var includeRuntime: Boolean
-		get() = _includeRuntime.value
-		set(value) {
-			_includeRuntime.value = value
-		}
-
-	var showMediaDetails: Boolean
-		get() = _showMediaDetails.value
-		set(value) {
-			_showMediaDetails.value = value
-		}
+    var includeRuntime: Boolean
+        get() = _includeRuntime.value
+        set(value) {
+            _includeRuntime.value = value
+        }
+        
+    var showMediaDetails: Boolean
+        get() = _showMediaDetails.value
+        set(value) {
+            _showMediaDetails.value = value
+        }
 
 	init {
 		isFocusable = false
 		descendantFocusability = FOCUS_BLOCK_DESCENDANTS
 	}
 
-	@Composable
-	override fun Content() {
-		val item by _item.collectAsState()
-		val mediaSource by _mediaSource.collectAsState()
-		val includeRuntime by _includeRuntime.collectAsState()
-		val showMediaDetails by _showMediaDetails.collectAsState()
+    @Composable
+    override fun Content() {
+        val item by _item.collectAsState()
+        val mediaSource by _mediaSource.collectAsState()
+        val includeRuntime by _includeRuntime.collectAsState()
+        val showMediaDetails by _showMediaDetails.collectAsState()
 
-		item?.let { BaseItemInfoRow(it, mediaSource, includeRuntime, showMediaDetails) }
-	}
+        item?.let { BaseItemInfoRow(it, mediaSource, includeRuntime, showMediaDetails) }
+    }
 }
