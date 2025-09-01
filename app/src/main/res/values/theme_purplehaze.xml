@@ -69,7 +69,7 @@
 
         <!-- QR Code -->
         <item name="qrBackground">@color/white</item>
-        <item name="qrForeground">@color/purplehaze_primary_dark</item>
+        <item name="qrForeground">@color/black</item>
 
         <!-- Tile backgrounds -->
         <item name="tile_port_person_bg">@color/purplehaze_tile_bg</item>

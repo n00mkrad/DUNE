@@ -75,7 +75,7 @@
 
         <!-- QR Code -->
         <item name="qrBackground">@color/white</item>
-        <item name="qrForeground">@color/emerald_primary</item>
+        <item name="qrForeground">@color/black</item>
 
         <!-- Tile backgrounds -->
         <item name="tile_port_person_bg">@color/emerald_card</item>
