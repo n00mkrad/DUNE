@@ -204,13 +204,17 @@ class MyDetailsOverviewRowPresenter(
 		return viewHolder!!
 	}
 
-	override fun onBindRowViewHolder(viewHolder: RowPresenter.ViewHolder?, item: Any?) {
-		super.onBindRowViewHolder(viewHolder, item)
-		if (item !is MyDetailsOverviewRow) return
-		if (viewHolder !is ViewHolder) return
+    // Main implementation that handles binding
+    override fun onBindRowViewHolder(viewHolder: RowPresenter.ViewHolder, item: Any) {
+        super.onBindRowViewHolder(viewHolder, item)
+        if (item !is MyDetailsOverviewRow) return
+        if (viewHolder !is ViewHolder) return
 
-		viewHolder.setItem(item)
-	}
+        viewHolder.setItem(item)
+    }
 
-	override fun onSelectLevelChanged(holder: RowPresenter.ViewHolder) = Unit
+    @Suppress("UNUSED_PARAMETER")
+    override fun onSelectLevelChanged(holder: RowPresenter.ViewHolder) {
+        // No action needed
+    }
 }
