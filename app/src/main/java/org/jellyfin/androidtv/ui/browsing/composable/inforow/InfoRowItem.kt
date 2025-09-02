@@ -20,7 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jellyfin.androidtv.ui.base.ProvideTextStyle
 
-// Single item in the BaseItemInfoRow
+/**
+ * A single item in the [BaseItemInfoRow].
+ */
 @Composable
 fun InfoRowItem(
 	// Icon options
@@ -36,7 +38,7 @@ fun InfoRowItem(
 	val modifier = when {
 		backgroundColor.alpha > 0f -> Modifier
 			.background(backgroundColor, RoundedCornerShape(3.dp))
-			.padding(horizontal = 4.dp)
+			.padding(horizontal = 5.dp)
 
 		else -> Modifier
 	}
@@ -54,12 +56,12 @@ fun InfoRowItem(
 			modifier = modifier.fillMaxHeight(),
 		) {
 			if (icon != null) {
-				Image(
-					painter = icon,
-					contentDescription = contentDescription,
-					modifier = Modifier.size(12.dp),
-				)
-			}
+                Image(
+                    painter = icon,
+                    contentDescription = contentDescription,
+                    modifier = Modifier.size(12.dp),
+                )
+            }
 
 			content()
 		}

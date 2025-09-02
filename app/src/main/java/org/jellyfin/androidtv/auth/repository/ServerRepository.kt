@@ -69,38 +69,22 @@ class ServerRepositoryImpl(
 
 	// Loading data
 	override suspend fun loadStoredServers() {
-		try {
-			Timber.d("Loading stored servers from authentication store")
-			val servers = authenticationStore.getServers()
-				.map { (id, entry) -> entry.asServer(id) }
-				.sortedWith(compareByDescending<Server> { it.dateLastAccessed }.thenBy { it.name })
-				.also { Timber.d("Loaded ${it.size} stored servers") }
-			_storedServers.emit(servers)
-		} catch (e: Exception) {
-			Timber.e(e, "Failed to load stored servers")
-			throw e
-		}
+		authenticationStore.getServers()
+			.map { (id, entry) -> entry.asServer(id) }
+			.sortedWith(compareByDescending<Server> { it.dateLastAccessed }.thenBy { it.name })
+			.let { _storedServers.emit(it) }
 	}
 
 	override suspend fun loadDiscoveryServers() {
-		try {
-			Timber.d("Starting server discovery")
-			val servers = mutableListOf<Server>()
+		val servers = mutableListOf<Server>()
 
-			jellyfin.discovery
-				.discoverLocalServers()
-				.map(ServerDiscoveryInfo::toServer)
-				.collect { server ->
-					servers += server
-					Timber.v("Discovered server: ${server.name} (${server.address})")
-					_discoveredServers.emit(servers.toList())
-				}
-
-			Timber.d("Server discovery completed. Found ${servers.size} servers")
-		} catch (e: Exception) {
-			Timber.e(e, "Error during server discovery")
-			throw e
-		}
+		jellyfin.discovery
+			.discoverLocalServers()
+			.map(ServerDiscoveryInfo::toServer)
+			.collect { server ->
+				servers += server
+				_discoveredServers.emit(servers.toList())
+			}
 	}
 
 	// Mutating data

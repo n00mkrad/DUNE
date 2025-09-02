@@ -70,7 +70,7 @@
 
         <!-- QR Code -->
         <item name="qrBackground">@color/white</item>
-        <item name="qrForeground">@color/flexy_primary</item>
+        <item name="qrForeground">@color/black</item>
 
         <!-- Tile backgrounds -->
         <item name="tile_port_person_bg">@color/flexy_tile_bg</item>
@@ -94,7 +94,7 @@
 
         <!-- Focus Border Color -->
         <item name="focusBorderColor">@color/flexy_accent</item>
-        
+
         <!-- Media Folders Buttons -->
         <item name="mediaFolderButtonFocusedBackground">@color/flexy_button_highlight</item>
         <item name="mediaFolderButtonTextColor">@color/flexy_text_primary</item>

@@ -16,6 +16,9 @@ import kotlin.reflect.KClass
 private val Destination.Fragment.fragmentClass: KClass<out Fragment>
     get() = fragment
 
+/**
+ * Repository for app navigation. This manages the screens/pages for the app.
+ */
 interface NavigationRepository {
 	/**
 	 * The current action to act on.
@@ -63,7 +66,7 @@ interface NavigationRepository {
 	 * Reset navigation to the initial destination or a specific [Destination.Fragment] without clearing history.
 	 */
 	fun reset(destination: Destination.Fragment? = null) = reset(destination, false)
-
+	
 	/**
 	 * Check if the backdrop should be cleared for the given destination.
 	 */
@@ -104,7 +107,7 @@ class NavigationRepositoryImpl(
 
 	override fun navigate(destination: Destination, replace: Boolean) {
 		Timber.d("Navigating to $destination (via navigate function)")
-
+		
 		// Clear backdrop if needed
 		clearBackdropIfNeeded(destination)
 
@@ -125,7 +128,7 @@ class NavigationRepositoryImpl(
 
 		Timber.d("Navigating back")
 		val currentFragment = fragmentHistory.pop()
-
+		
 		// Check if we're navigating back to the horizontal grid browse
 		if (fragmentHistory.isNotEmpty()) {
 			val previousFragment = fragmentHistory.peek()
@@ -142,10 +145,10 @@ class NavigationRepositoryImpl(
 	override fun reset(destination: Destination.Fragment?, clearHistory: Boolean) {
 		fragmentHistory.clear()
 		val actualDestination = destination ?: defaultDestination
-
+		
 		// Clear backdrop if needed
 		clearBackdropIfNeeded(actualDestination)
-
+		
 		_currentAction.tryEmit(NavigationAction.navigateFragment(actualDestination, true, false, clearHistory))
 		Timber.d("Navigating to $actualDestination (via reset, clearHistory=$clearHistory)")
 	}

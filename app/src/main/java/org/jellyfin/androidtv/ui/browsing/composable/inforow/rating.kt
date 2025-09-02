@@ -1,4 +1,5 @@
 package org.jellyfin.androidtv.ui.browsing.composable.inforow
+
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -6,7 +7,11 @@ import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.ui.base.Text
 import java.text.NumberFormat
 
-// Info row items for community, critic, and parental ratings
+/**
+ * A community rating item in the [BaseItemInfoRow].
+ *
+ * @param communityRating Between 0f and 1f.
+ */
 @Composable
 fun InfoRowCommunityRating(communityRating: Float) {
 	InfoRowItem(
@@ -19,6 +24,11 @@ fun InfoRowCommunityRating(communityRating: Float) {
 
 private const val CRITIC_RATING_FRESH = 0.6f
 
+/**
+ * A critic rating item in the [BaseItemInfoRow].
+ *
+ * @param criticRating Between 0f and 1f.
+ */
 @Composable
 fun InfoRowCriticRating(criticRating: Float) {
 	InfoRowItem(
@@ -32,6 +42,9 @@ fun InfoRowCriticRating(criticRating: Float) {
 	}
 }
 
+/**
+ * A parental rating item in the [BaseItemInfoRow].
+ */
 @Composable
 fun InfoRowParentalRating(parentalRating: String) {
 	InfoRowItem(

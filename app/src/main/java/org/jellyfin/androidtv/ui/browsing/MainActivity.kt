@@ -53,9 +53,9 @@ import java.util.UUID
 import kotlin.math.min
 
 class MainActivity : FragmentActivity() {
-    override fun attachBaseContext(newBase: Context) {
-        super.attachBaseContext(LocaleUtils.wrapContext(newBase))
-    }
+	override fun attachBaseContext(newBase: Context) {
+		super.attachBaseContext(LocaleUtils.wrapContext(newBase))
+	}
 	private val navigationRepository by inject<NavigationRepository>()
 	private val sessionRepository by inject<SessionRepository>()
 	private val userRepository by inject<UserRepository>()
@@ -125,76 +125,76 @@ class MainActivity : FragmentActivity() {
 	}
 
 	override fun onNewIntent(intent: Intent) {
-			super.onNewIntent(intent)
-			setIntent(intent) // Important: Update the intent so getIntent() returns the latest one
-			Timber.d("onNewIntent: ${intent.data}")
-			Timber.d("Intent action: ${intent.action}")
-			Timber.d("Intent extras: ${intent.extras?.keySet()?.joinToString()}")
+		super.onNewIntent(intent)
+		setIntent(intent) // Important: Update the intent so getIntent() returns the latest one
+		Timber.d("onNewIntent: ${intent.data}")
+		Timber.d("Intent action: ${intent.action}")
+		Timber.d("Intent extras: ${intent.extras?.keySet()?.joinToString()}")
 
-			// Handle the intent in onResume to ensure the activity is fully created
-			handleIntent(intent)
+		// Handle the intent in onResume to ensure the activity is fully created
+		handleIntent(intent)
+	}
+
+	private fun handleIntent(intent: Intent) {
+		try {
+			// Check for item ID in extras
+			val itemId = intent.getStringExtra("ItemId") ?: return
+			val isUserView = intent.getBooleanExtra("ItemIsUserView", false)
+			val searchQuery = if (intent.action == MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH) {
+				intent.getStringExtra(SearchManager.QUERY) ?: ""
+			} else null
+			val startPlayback = !searchQuery.isNullOrBlank()
+
+			Timber.d("Handling intent with item: $itemId, isUserView: $isUserView, startPlayback: $startPlayback, searchQuery: $searchQuery")
+
+			// Create a minimal BaseItemDto with required fields
+			val item = BaseItemDto(
+				id = UUID.fromString(itemId),
+				type = if (isUserView) BaseItemKind.USER_VIEW else BaseItemKind.FOLDER,
+				mediaType = MediaType.UNKNOWN,
+				name = ""
+			)
+
+			// Reset navigation first to ensure clean state
+			navigationRepository.reset(clearHistory = true)
+
+			// Use itemDetails for navigation as it's more reliable with minimal item data
+			val destination = Destinations.itemDetails(item.id!!)
+			navigationRepository.navigate(destination)
+
+			// Clear the intent to prevent handling it multiple times
+			setIntent(Intent())
+		} catch (e: Exception) {
+			Timber.e(e, "Error handling intent navigation")
 		}
+	}
 
-		private fun handleIntent(intent: Intent) {
+	override fun onResume() {
+		super.onResume()
+
+		if (!validateAuthentication()) return
+
+		applyTheme()
+
+		screensaverViewModel.activityPaused = false
+
+		// Ensure WebSocket connection is active
+		lifecycleScope.launch(Dispatchers.IO) {
 			try {
-				// Check for item ID in extras
-				val itemId = intent.getStringExtra("ItemId") ?: return
-				val isUserView = intent.getBooleanExtra("ItemIsUserView", false)
-				val searchQuery = if (intent.action == MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH) {
-					intent.getStringExtra(SearchManager.QUERY) ?: ""
-				} else null
-				val startPlayback = !searchQuery.isNullOrBlank()
-
-				Timber.d("Handling intent with item: $itemId, isUserView: $isUserView, startPlayback: $startPlayback, searchQuery: $searchQuery")
-
-				// Create a minimal BaseItemDto with required fields
-				val item = BaseItemDto(
-					id = UUID.fromString(itemId),
-					type = if (isUserView) BaseItemKind.USER_VIEW else BaseItemKind.FOLDER,
-					mediaType = MediaType.UNKNOWN,
-					name = ""
-				)
-
-				// Reset navigation first to ensure clean state
-				navigationRepository.reset(clearHistory = true)
-
-				// Use itemDetails for navigation as it's more reliable with minimal item data
-				val destination = Destinations.itemDetails(item.id!!)
-				navigationRepository.navigate(destination)
-
-				// Clear the intent to prevent handling it multiple times
-				setIntent(Intent())
+				socketHandler.updateSession()
+				Timber.i("WebSocket session updated in MainActivity.onResume")
 			} catch (e: Exception) {
-				Timber.e(e, "Error handling intent navigation")
+				Timber.e(e, "Failed to update WebSocket session in MainActivity.onResume")
 			}
 		}
 
-		override fun onResume() {
-			super.onResume()
-
-			if (!validateAuthentication()) return
-
-			applyTheme()
-
-			screensaverViewModel.activityPaused = false
-
-			// Ensure WebSocket connection is active
-			lifecycleScope.launch(Dispatchers.IO) {
-				try {
-					socketHandler.updateSession()
-					Timber.i("WebSocket session updated in MainActivity.onResume")
-				} catch (e: Exception) {
-					Timber.e(e, "Failed to update WebSocket session in MainActivity.onResume")
-				}
-			}
-
-			// Handle any pending intents when the activity is resumed
-			intent?.let { currentIntent ->
-				if (currentIntent.hasExtra("ItemId")) {
-					handleIntent(currentIntent)
-				}
+		// Handle any pending intents when the activity is resumed
+		intent?.let { currentIntent ->
+			if (currentIntent.hasExtra("ItemId")) {
+				handleIntent(currentIntent)
 			}
 		}
+	}
 
 	private fun validateAuthentication(): Boolean {
 		if (sessionRepository.currentSession.value == null || userRepository.currentUser.value == null) {
@@ -307,19 +307,19 @@ class MainActivity : FragmentActivity() {
 		return super.dispatchTouchEvent(ev)
 	}
 
-    private fun showExitConfirmation() {
-        val dialog = AlertDialog.Builder(this, R.style.ExitDialogTheme).apply {
-            setMessage(R.string.exit_app_message)
-            setPositiveButton(R.string.yes) { _, _ -> finishAndRemoveTask() }
-            setNegativeButton(R.string.no) { dialog, _ -> dialog.dismiss() }
-            setCancelable(true)
-        }
+	private fun showExitConfirmation() {
+		val dialog = AlertDialog.Builder(this, R.style.ExitDialogTheme).apply {
+			setMessage(R.string.exit_app_message)
+			setPositiveButton(R.string.yes) { _, _ -> finishAndRemoveTask() }
+			setNegativeButton(R.string.no) { dialog, _ -> dialog.dismiss() }
+			setCancelable(true)
+		}
 
-        val alertDialog = dialog.create()
-        val displayMetrics = applicationContext.resources.displayMetrics
-        val screenWidth = min(displayMetrics.widthPixels, displayMetrics.heightPixels)
+		val alertDialog = dialog.create()
+		val displayMetrics = applicationContext.resources.displayMetrics
+		val screenWidth = min(displayMetrics.widthPixels, displayMetrics.heightPixels)
 
-        alertDialog.window?.let { window ->
+		alertDialog.window?.let { window ->
 			// Set the background drawable
 			val drawable = ContextCompat.getDrawable(this@MainActivity, R.drawable.exit_dialog_background)
 			window.setBackgroundDrawable(drawable)
@@ -383,11 +383,11 @@ class MainActivity : FragmentActivity() {
 		}
 	}
 
-    private fun handleOnBackPressed() {
-        if (supportFragmentManager.backStackEntryCount > 0) {
-            supportFragmentManager.popBackStack()
-        } else {
-            showExitConfirmation()
-        }
-    }
+	private fun handleOnBackPressed() {
+		if (supportFragmentManager.backStackEntryCount > 0) {
+			supportFragmentManager.popBackStack()
+		} else {
+			showExitConfirmation()
+		}
+	}
 }

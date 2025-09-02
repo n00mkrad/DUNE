@@ -3,9 +3,6 @@ package org.jellyfin.androidtv.preference
 import kotlinx.coroutines.runBlocking
 import org.jellyfin.sdk.api.client.ApiClient
 import kotlin.collections.set
-import org.jellyfin.androidtv.preference.LiveTvPreferences
-import org.jellyfin.androidtv.preference.LibraryPreferences
-import org.jellyfin.androidtv.preference.UserSettingPreferences
 
 /**
  * Repository to access special preference stores.

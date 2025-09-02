@@ -21,6 +21,10 @@
         <item name="android:windowBackground">@color/yellowtown_Fading_background</item>
         <item name="android:colorBackground">@color/yellowtown_Fading_background</item>
 
+        <!-- QR Code -->
+        <item name="qrBackground">@color/white</item>
+        <item name="qrForeground">@color/black</item>
+
         <!-- Text colors -->
         <item name="android:textColorPrimary">@color/yellowtown_text_primary</item>
         <item name="android:textColorSecondary">@color/white</item>

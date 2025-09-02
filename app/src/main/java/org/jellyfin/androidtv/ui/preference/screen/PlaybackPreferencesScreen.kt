@@ -1,15 +1,17 @@
 package org.jellyfin.androidtv.ui.preference.screen
 
-import org.jellyfin.androidtv.ui.preference.dsl.subtitlePreview
-
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import kotlin.math.roundToInt
+import org.jellyfin.androidtv.ui.preference.dsl.subtitlePreview
 import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.preference.UserPreferences
 import org.jellyfin.androidtv.preference.UserSettingPreferences
 import org.jellyfin.androidtv.preference.constant.AudioBehavior
 import org.jellyfin.androidtv.preference.constant.NEXTUP_TIMER_DISABLED
 import org.jellyfin.androidtv.preference.constant.NextUpBehavior
+import org.jellyfin.androidtv.preference.constant.SubtitleLanguage
+import org.jellyfin.androidtv.preference.constant.AudioLanguage
 import org.jellyfin.androidtv.ui.playback.segment.MediaSegmentAction
 import org.jellyfin.androidtv.ui.playback.segment.MediaSegmentRepository
 import org.jellyfin.androidtv.ui.preference.custom.DurationSeekBarPreference
@@ -17,14 +19,13 @@ import org.jellyfin.androidtv.ui.preference.dsl.OptionsFragment
 import org.jellyfin.androidtv.ui.preference.dsl.checkbox
 import org.jellyfin.androidtv.ui.preference.dsl.colorList
 import org.jellyfin.androidtv.ui.preference.dsl.enum
-import org.jellyfin.androidtv.ui.preference.dsl.list
 import org.jellyfin.androidtv.ui.preference.dsl.link
 import org.jellyfin.androidtv.ui.preference.dsl.optionsScreen
 import org.jellyfin.androidtv.ui.preference.dsl.seekbar
 import org.jellyfin.preference.store.PreferenceStore
 import org.jellyfin.sdk.model.api.MediaSegmentType
 import org.koin.android.ext.android.inject
-import kotlin.math.roundToInt
+import java.util.Map.entry
 
 class PlaybackPreferencesScreen : OptionsFragment() {
 	private val userPreferences: UserPreferences by inject()
@@ -94,44 +95,14 @@ class PlaybackPreferencesScreen : OptionsFragment() {
 				bind(userPreferences, UserPreferences.audioBehaviour)
 			}
 
-			// Audio language preference
-			list {
+			enum<AudioLanguage> {
 				setTitle(R.string.pref_audio_default_language)
-				// Set the entries for the list in alphabetical order by display name
-				entries = mapOf(
-					"" to getString(R.string.pref_default_language_none),
-					"ara" to getString(R.string.pref_default_language_ara),
-					"zho" to getString(R.string.pref_default_language_zho),
-					"ces" to getString(R.string.pref_default_language_ces),
-					"dan" to getString(R.string.pref_default_language_dan),
-					"nld" to getString(R.string.pref_default_language_nld),
-					"eng" to getString(R.string.pref_default_language_eng),
-					"fin" to getString(R.string.pref_default_language_fin),
-					"fra" to getString(R.string.pref_default_language_fra),
-					"deu" to getString(R.string.pref_default_language_deu),
-					"ell" to getString(R.string.pref_default_language_ell),
-					"heb" to getString(R.string.pref_default_language_heb),
-					"hin" to getString(R.string.pref_default_language_hin),
-					"hun" to getString(R.string.pref_default_language_hun),
-					"ind" to getString(R.string.pref_default_language_ind),
-					"ita" to getString(R.string.pref_default_language_ita),
-					"jpn" to getString(R.string.pref_default_language_jpn),
-					"kor" to getString(R.string.pref_default_language_kor),
-					"msa" to getString(R.string.pref_default_language_msa),
-					"nor" to getString(R.string.pref_default_language_nor),
-					"pol" to getString(R.string.pref_default_language_pol),
-					"por" to getString(R.string.pref_default_language_por),
-					"ron" to getString(R.string.pref_default_language_ron),
-					"rus" to getString(R.string.pref_default_language_rus),
-					"slk" to getString(R.string.pref_default_language_slk),
-					"spa" to getString(R.string.pref_default_language_spa),
-					"swe" to getString(R.string.pref_default_language_swe),
-					"tha" to getString(R.string.pref_default_language_tha),
-					"tur" to getString(R.string.pref_default_language_tur),
-					"ukr" to getString(R.string.pref_default_language_ukr),
-					"vie" to getString(R.string.pref_default_language_vie)
-				)
-				// Bind to the preference store
+
+				// Add all enum values with their display names
+				AudioLanguage.values().forEach { language ->
+					entry(language.name, language.name)
+				}
+
 				bind(userPreferences, UserPreferences.defaultAudioLanguage)
 			}
 		}
@@ -240,6 +211,19 @@ class PlaybackPreferencesScreen : OptionsFragment() {
 				}
 			}
 
+			enum<SubtitleLanguage> {
+				setTitle(R.string.pref_subtitle_default_language)
+
+				// Add all enum values with their display names
+				SubtitleLanguage.values().forEach { language ->
+					entry(language.name, language.displayName)
+				}
+
+				bind(userPreferences, UserPreferences.defaultSubtitleLanguage)
+
+
+			}
+
 			colorList {
 				setTitle(R.string.lbl_subtitle_text_stroke_color)
 				entries = mapOf(
@@ -315,4 +299,3 @@ class PlaybackPreferencesScreen : OptionsFragment() {
 		}
 	}
 }
-

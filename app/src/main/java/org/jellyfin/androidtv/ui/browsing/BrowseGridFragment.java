@@ -780,7 +780,7 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
                         // This is a sort by option (Name, Date Added, etc.)
                         MenuItem menuItem = sortMenu.getMenu().add(0, entry.getKey(), entry.getKey(), option.name);
                         menuItem.setChecked(option.value != null && option.value.equals(mAdapter.getSortBy()) &&
-                            option.order != null && option.order.equals(mAdapter.getSortOrder()));
+                                option.order != null && option.order.equals(mAdapter.getSortOrder()));
                     } else if (option.order != null) {
                         // This is a sort order option (Ascending/Descending)
                         MenuItem menuItem = sortMenu.getMenu().add(1, entry.getKey(), entry.getKey(), option.name);
@@ -808,9 +808,9 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
                                 // This is a sort order option
                                 SortOption currentSort = getSortOption(mAdapter.getSortBy());
                                 SortOption newSort = new SortOption(
-                                    currentSort.name,
-                                    currentSort.value,
-                                    selectedOption.order
+                                        currentSort.name,
+                                        currentSort.value,
+                                        selectedOption.order
                                 );
                                 mAdapter.setSortBy(newSort);
                             }
@@ -994,7 +994,7 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
 
             // Don't set background in grid browse views (both horizontal and vertical)
             if (!(mGridPresenter instanceof HorizontalGridPresenter) &&
-                !(mGridPresenter instanceof VerticalGridPresenter)) {
+                    !(mGridPresenter instanceof VerticalGridPresenter)) {
                 backgroundService.getValue().setBackground(mCurrentItem.getBaseItem());
             }
             setItem(mCurrentItem);

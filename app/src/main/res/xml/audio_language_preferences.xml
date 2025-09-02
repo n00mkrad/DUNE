@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        android:key="pref_audio_default_language"
+        android:title="@string/pref_audio_default_language"
+        android:summary="@string/pref_audio_default_language_summary"
+        android:entries="@array/pref_audio_language_entries"
+        android:entryValues="@array/pref_audio_language_values"
+        android:defaultValue=""
+        android:dialogTitle="@string/pref_audio_default_language"
+        app:useSimpleSummaryProvider="true" />
+
+</PreferenceScreen>

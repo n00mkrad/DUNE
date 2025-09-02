@@ -134,7 +134,7 @@ class AppUpdater(private val context: Context) {
 
     suspend fun downloadAndInstall(version: String, downloadUrl: String) {
 		Timber.tag("AppUpdater").d("Starting downloadAndInstall for version: $version")
-		Timber.tag("AppUpdater").d("Download URL: $downloadUrl")
+        android.util.Log.d("AppUpdater", "Download URL: $downloadUrl")
         try {
             showNotification(
                 context.getString(R.string.update_downloading_title),
@@ -142,41 +142,41 @@ class AppUpdater(private val context: Context) {
                 0,
                 true
             )
-			Timber.tag("AppUpdater").d("Notification shown")
+            android.util.Log.d("AppUpdater", "Notification shown")
 
-			Timber.tag("AppUpdater").d("Creating download request")
+            android.util.Log.d("AppUpdater", "Creating download request")
             val request = Request.Builder()
                 .url(downloadUrl)
                 .build()
-			Timber.tag("AppUpdater").d("Request created")
+            android.util.Log.d("AppUpdater", "Request created")
 
             val response = try {
-                Timber.tag("AppUpdater").d("Executing network request...")
-				withContext(Dispatchers.IO) {
+                android.util.Log.d("AppUpdater", "Executing network request...")
+                withContext(Dispatchers.IO) {
                     client.newCall(request).execute()
                 }
             } catch (e: Exception) {
-				Timber.tag("AppUpdater").e(e, "Network request failed")
+                android.util.Log.e("AppUpdater", "Network request failed", e)
                 throw IOException("Network request failed: ${e.message}", e)
             }
 
-			Timber.tag("AppUpdater").d("Response code: ${response.code}")
+            android.util.Log.d("AppUpdater", "Response code: ${response.code}")
             if (!response.isSuccessful) {
                 val errorBody = response.body?.string()
-				Timber.tag("AppUpdater").e("Failed to download update: ${response.code} - ${response.message}\n$errorBody")
+                android.util.Log.e("AppUpdater", "Failed to download update: ${response.code} - ${response.message}\n$errorBody")
                 throw IOException("Failed to download update: ${response.code} - ${response.message}")
             }
 
             val body = response.body ?: throw IOException("Empty response body")
             val contentLength = body.contentLength()
-			Timber.tag("AppUpdater").d("Content length: $contentLength bytes")
+            android.util.Log.d("AppUpdater", "Content length: $contentLength bytes")
             val inputStream = body.byteStream()
 
             val downloadsDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
                 ?: throw IOException("Cannot access downloads directory")
 
             val apkFile = File(downloadsDir, "DUNE_${version}.apk")
-			Timber.tag("AppUpdater").d("Saving to: ${apkFile.absolutePath}")
+            android.util.Log.d("AppUpdater", "Saving to: ${apkFile.absolutePath}")
             val outputStream = FileOutputStream(apkFile)
 
             val buffer = ByteArray(4096)
@@ -207,8 +207,8 @@ class AppUpdater(private val context: Context) {
             outputStream.close()
             inputStream.close()
 
-            Timber.tag("AppUpdater").d("Download complete, starting installation")
-			Timber.tag("AppUpdater").d("File exists: ${apkFile.exists()}, size: ${apkFile.length()} bytes")
+            android.util.Log.d("AppUpdater", "Download complete, starting installation")
+            android.util.Log.d("AppUpdater", "File exists: ${apkFile.exists()}, size: ${apkFile.length()} bytes")
             installApk(apkFile)
 
         } catch (e: Exception) {

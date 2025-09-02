@@ -59,6 +59,7 @@ class PlaybackLauncher(
 
 			if (userPreferences[UserPreferences.useExternalPlayer] && items.all { it.supportsExternalPlayer }) {
 				context.startActivity(ActivityDestinations.externalPlayer(context, position?.milliseconds ?: Duration.ZERO))
+
 			} else {
 				val destination = Destinations.videoPlayer(position)
 				navigationRepository.navigate(destination, replace)

@@ -56,9 +56,9 @@ import timber.log.Timber
 import java.util.UUID
 
 class StartupActivity : FragmentActivity() {
-    override fun attachBaseContext(newBase: Context) {
-        super.attachBaseContext(LocaleUtils.wrapContext(newBase))
-    }
+	override fun attachBaseContext(newBase: Context) {
+		super.attachBaseContext(LocaleUtils.wrapContext(newBase))
+	}
 	companion object {
 		const val EXTRA_ITEM_ID = "ItemId"
 		const val EXTRA_ITEM_IS_USER_VIEW = "ItemIsUserView"

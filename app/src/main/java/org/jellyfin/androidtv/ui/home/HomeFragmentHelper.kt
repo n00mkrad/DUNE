@@ -125,7 +125,7 @@ class HomeFragmentHelper(
 
                         // Set fixed dimensions for all cards in the row
                         (viewHolder.view as? LegacyImageCardView)?.let { cardView ->
-                            cardView.setMainImageDimensions(235, 135) // Standard card dimensions
+                            cardView.setMainImageDimensions(225, 128) // Standard card dimensions for episode cards
                             // Set card type to not show info below
                             cardView.cardType = BaseCardView.CARD_TYPE_INFO_UNDER_WITH_EXTRA
                         }
@@ -189,7 +189,7 @@ class HomeFragmentHelper(
 
                         // Set fixed dimensions for all cards in the rows
                         (viewHolder.view as? LegacyImageCardView)?.let { cardView ->
-                            cardView.setMainImageDimensions(235, 135) // Standard card dimensions
+                            cardView.setMainImageDimensions(225, 128) // Standard card dimensions for episode cards
                             // Set card type to show info below
                             cardView.cardType = BaseCardView.CARD_TYPE_INFO_UNDER
                         }
@@ -227,9 +227,9 @@ class HomeFragmentHelper(
             ),
             excludeItemTypes = listOf(BaseItemKind.EPISODE),
             genres = listOf(genreName),
-            sortBy = listOf(ItemSortBy.RANDOM),
+            sortBy = listOf(ItemSortBy.PRODUCTION_YEAR),
 			sortOrder = listOf(SortOrder.DESCENDING),
-			limit = 5,
+			limit = 10,
             recursive = true,
             fields = ItemRepository.itemFields,
             imageTypeLimit = 1,
