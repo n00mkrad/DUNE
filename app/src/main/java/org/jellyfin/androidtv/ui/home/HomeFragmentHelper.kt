@@ -120,7 +120,7 @@ class HomeFragmentHelper(
                     if (useSeriesThumbnails) ImageType.THUMB else ImageType.POSTER,  // Use THUMB or POSTER based on preference
                     195  // Standard height for no-info cards
                 ) {
-                    override fun onBindViewHolder(viewHolder: Presenter.ViewHolder, item: Any) {
+                    override fun onBindViewHolder(viewHolder: Presenter.ViewHolder, item: Any?) {
                         super.onBindViewHolder(viewHolder, item)
 
                         // Set fixed dimensions for all cards in the row
@@ -183,9 +183,8 @@ class HomeFragmentHelper(
                     if (useSeriesThumbnails) ImageType.THUMB else ImageType.THUMB,  // Use THUMB or POSTER etc based on preference
                     260  // staticHeight
                 ) {
-                    override fun onBindViewHolder(viewHolder: Presenter.ViewHolder, item: Any) {
+                    override fun onBindViewHolder(viewHolder: Presenter.ViewHolder, item: Any?) {
                         super.onBindViewHolder(viewHolder, item)
-
 
                         // Set fixed dimensions for all cards in the rows
                         (viewHolder.view as? LegacyImageCardView)?.let { cardView ->

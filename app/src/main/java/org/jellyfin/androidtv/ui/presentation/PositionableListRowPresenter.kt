@@ -50,18 +50,19 @@ class PositionableListRowPresenter : CustomListRowPresenter {
         viewHolder.headerViewHolder?.view?.alpha = 1f
     }
 
-    override fun onSelectLevelChanged(holder: RowPresenter.ViewHolder?) {
+    @Suppress("UNUSED_PARAMETER")
+    override fun onSelectLevelChanged(holder: RowPresenter.ViewHolder) {
         super.onSelectLevelChanged(holder)
         // Keep header visible when row is selected
-        holder?.headerViewHolder?.view?.visibility = View.VISIBLE
-        holder?.headerViewHolder?.view?.alpha = 1f
+        holder.headerViewHolder?.view?.visibility = View.VISIBLE
+        holder.headerViewHolder?.view?.alpha = 1f
     }
 
-    override fun onBindRowViewHolder(holder: RowPresenter.ViewHolder?, item: Any?) {
+    override fun onBindRowViewHolder(holder: RowPresenter.ViewHolder, item: Any) {
         super.onBindRowViewHolder(holder, item)
-        if (holder !is ViewHolder) return
-
-        viewHolder = holder
+        if (holder is ViewHolder) {
+            viewHolder = holder
+        }
     }
 
     var position: Int

@@ -361,7 +361,7 @@ class StatsAction(
                 if (isTranscoding) {
                     // Add transcoding protocol if available
                     currentMediaSource.transcodingSubProtocol?.let { protocol ->
-                        append("Protocol: ${protocol.toString().toUpperCase()}\n")
+                        append("Protocol: ${protocol.toString().uppercase()}\n")
                     }
 
                     // Add media format information

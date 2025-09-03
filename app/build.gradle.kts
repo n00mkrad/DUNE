@@ -40,18 +40,15 @@ android {
 		targetCompatibility = JavaVersion.VERSION_21
 	}
 
-	// Using older kotlinOptions syntax to maintain compatibility
-	// but with @Suppress to hide the deprecation warning
-	@Suppress("DEPRECATION")
-	kotlinOptions {
-		jvmTarget = "21"
-		freeCompilerArgs += listOf("-Xjvm-default=all")
+	// Configure Kotlin compiler options
+	kotlin {
+		jvmToolchain(21)
 	}
 
 	tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-		@Suppress("DEPRECATION")
-		kotlinOptions {
-			jvmTarget = "21"
+		compilerOptions {
+			jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+			freeCompilerArgs.add("-Xjvm-default=all")
 		}
 	}
 
@@ -144,7 +141,7 @@ tasks.register("buildEnhanced") {
 
 
 dependencies {
-    implementation("androidx.compose.material:material:1.5.0")
+	implementation("androidx.compose.material:material:1.5.0")
 	// Jellyfin
 	implementation(projects.playback.core)
 	implementation(projects.playback.jellyfin)
@@ -195,14 +192,15 @@ dependencies {
 	implementation(libs.androidx.media3.ui)
 	implementation(libs.jellyfin.androidx.media3.ffmpeg.decoder)
 	implementation(libs.libass.media3)
+
 	// Markdown
 	implementation(libs.bundles.markwon)
 
-    // Logging
-    implementation(libs.timber)
-    implementation(libs.slf4j.timber)
+	// Logging
+	implementation(libs.timber)
+	implementation(libs.slf4j.timber)
 
-    // Image utility
+	// Image utility
 	implementation(libs.bundles.coil)
 	implementation("com.github.bumptech.glide:glide:4.16.0")
 	implementation("androidx.viewpager2:viewpager2:1.0.0")
@@ -230,4 +228,3 @@ dependencies {
 	testImplementation(libs.kotest.assertions)
 	testImplementation(libs.mockk)
 }
-

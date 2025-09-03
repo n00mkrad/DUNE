@@ -7,23 +7,33 @@ import androidx.leanback.widget.ListRowPresenter
 import androidx.leanback.widget.RowPresenter
 
 open class CustomListRowPresenter @JvmOverloads constructor(
-	private val topPadding: Int? = null
+    private val topPadding: Int? = null
 ) : ListRowPresenter() {
-	init {
-		headerPresenter = CustomRowHeaderPresenter()
-	}
+    init {
+        headerPresenter = CustomRowHeaderPresenter()
+    }
 
-	override fun isUsingDefaultShadow() = false
+    override fun isUsingDefaultShadow() = false
 
-	override fun onSelectLevelChanged(holder: RowPresenter.ViewHolder?) = Unit
+    @Suppress("UNUSED_PARAMETER")
+    override fun onSelectLevelChanged(holder: RowPresenter.ViewHolder) {
+        // No action needed
+    }
 
-	override fun onBindRowViewHolder(holder: RowPresenter.ViewHolder?, item: Any?) {
-		super.onBindRowViewHolder(holder, item)
+    // Main implementation that handles binding
+    @Suppress("DEPRECATION")
+    override fun onBindRowViewHolder(holder: RowPresenter.ViewHolder, item: Any) {
+        super.onBindRowViewHolder(holder, item)
+        updateView(holder, item)
+    }
 
-		val view = holder?.view?.parent as? View ?: return
-		if (topPadding != null) view.setPadding(view.paddingLeft, topPadding, view.paddingRight, view.paddingBottom)
+    private fun updateView(holder: RowPresenter.ViewHolder, item: Any) {
+        val view = holder.view.parent as? View ?: return
+        if (topPadding != null) {
+            view.setPadding(view.paddingLeft, topPadding, view.paddingRight, view.paddingBottom)
+        }
 
-		// Hide header view when the item doesn't have one
-		holder.headerViewHolder.view.isVisible = !(item is ListRow && item.headerItem == null)
-	}
+        // Hide header view when the item doesn't have one
+        holder.headerViewHolder.view.isVisible = !(item is ListRow && item.headerItem == null)
+    }
 }

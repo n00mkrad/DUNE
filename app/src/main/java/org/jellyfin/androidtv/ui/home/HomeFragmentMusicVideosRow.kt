@@ -43,7 +43,7 @@ class HomeFragmentMusicVideosRow(
                 setUniformAspect(true)
             }
 
-            override fun onBindViewHolder(viewHolder: Presenter.ViewHolder, item: Any) {
+            override fun onBindViewHolder(viewHolder: Presenter.ViewHolder, item: Any?) {
                 super.onBindViewHolder(viewHolder, item)
 
                 // Set fixed dimensions for all cards in the row
