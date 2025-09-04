@@ -310,7 +310,12 @@ class MainActivity : FragmentActivity() {
 	private fun showExitConfirmation() {
 		val dialog = AlertDialog.Builder(this, R.style.ExitDialogTheme).apply {
 			setMessage(R.string.exit_app_message)
-			setPositiveButton(R.string.yes) { _, _ -> finishAndRemoveTask() }
+			setPositiveButton(R.string.yes) { _, _ -> 
+				// Force close the app completely
+				finishAffinity()
+				android.os.Process.killProcess(android.os.Process.myPid())
+				System.exit(0)
+			}
 			setNegativeButton(R.string.no) { dialog, _ -> dialog.dismiss() }
 			setCancelable(true)
 		}
