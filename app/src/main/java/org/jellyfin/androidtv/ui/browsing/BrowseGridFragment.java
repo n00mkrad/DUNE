@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.PopupWindow;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -349,11 +350,20 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
                         (filters.isFavoriteOnly() ? getString(R.string.lbl_favorites) : "");
             }
 
+            text += " " + getString(R.string.lbl_from) + " " + folderName;
+
+            if (mAdapter.getSortBy() != null) {
+                text += " " + getString(R.string.lbl_sorted_by) + " " + mAdapter.getSortBy().toString();
+            }
+
+            String genreFilter = mAdapter.getGenreFilter();
+            if (genreFilter != null && !genreFilter.isEmpty()) {
+                text += ", Genre: " + genreFilter;
+            }
+
             if (mAdapter.getStartLetter() != null) {
                 text += " " + getString(R.string.lbl_starting_with) + " " + mAdapter.getStartLetter();
             }
-
-            text += " " + getString(R.string.lbl_from) + " '" + folderName + "' " + getString(R.string.lbl_sorted_by) + " " + getSortOption(mAdapter.getSortBy()).name;
 
             if (binding.statusText != null) {
                 binding.statusText.setText(text);
@@ -748,6 +758,7 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
     private ImageButton mUnwatchedButton;
     private ImageButton mFavoriteButton;
     private ImageButton mLetterButton;
+    private ImageButton mMasksButton;
 
     private void updateDisplayPrefs() {
         CoroutineUtils.runOnLifecycle(getLifecycle(), (coroutineScope, continuation) -> {
@@ -827,6 +838,64 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
         mSortButton.setContentDescription(getString(R.string.lbl_sort_by));
 
         binding.toolBar.addView(mSortButton);
+        mMasksButton = new ImageButton(requireContext(), null, 0, R.style.Button_Icon);
+        mMasksButton.setImageResource(R.drawable.ic_masks);
+        mMasksButton.setMaxHeight(size);
+        mMasksButton.setAdjustViewBounds(true);
+        mMasksButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu genreMenu = new PopupMenu(getActivity(), binding.toolBar, Gravity.END);
+
+                // genre options
+                String[] genres = {
+                    "Action", "Adventure", "Animation", "Anime","Comedy",
+                    "Crime", "Documentary", "Drama", "Family", "Fantasy",
+                    "History", "Horror", "Music", "Mystery", "Romance",
+                    "Science Fiction", "Thriller", "War", "Western", "TV Movie"
+                };
+
+                genreMenu.getMenu().setGroupCheckable(0, true, true);
+
+                String currentGenre = mAdapter.getGenreFilter();
+
+                MenuItem allGenresItem = genreMenu.getMenu().add(0, 0, 0, "All Genres");
+                allGenresItem.setChecked(currentGenre == null || currentGenre.isEmpty());
+
+                for (int i = 0; i < genres.length; i++) {
+                    MenuItem item = genreMenu.getMenu().add(0, i + 1, i + 1, genres[i]);
+                    item.setCheckable(true);
+                    item.setChecked(genres[i].equals(currentGenre));
+                }
+
+                // item click listener
+                genreMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        if (mAdapter != null) {
+                            String selectedGenre = item.getItemId() == 0 ? null : item.getTitle().toString();
+                            mAdapter.setGenreFilter(selectedGenre);
+                            mAdapter.Retrieve();
+                            updateCounter(mAdapter.getTotalItems() > 0 ? 1 : 0);
+
+                            // Update the checked state of all items
+                            for (int i = 0; i < genreMenu.getMenu().size(); i++) {
+                                MenuItem menuItem = genreMenu.getMenu().getItem(i);
+                                menuItem.setChecked(menuItem == item);
+                            }
+
+                            setStatusText(mainTitle);
+                        }
+                        return true;
+                    }
+                });
+
+                genreMenu.show();
+            }
+        });
+        mMasksButton.setContentDescription(getString(R.string.lbl_genres));
+
+        binding.toolBar.addView(mMasksButton);
 
         if (mRowDef.getQueryType() == QueryType.Items) {
             mUnwatchedButton = new ImageButton(requireContext(), null, 0, R.style.Button_Icon);

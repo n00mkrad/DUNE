@@ -98,6 +98,7 @@ public class ItemRowAdapter extends MutableObjectAdapter<Object> {
     private boolean currentlyRetrieving = false;
 
     private boolean preferParentThumb = false;
+    private String mGenreFilter;
     private boolean staticHeight = false;
 
     private final Lazy<org.jellyfin.sdk.api.client.ApiClient> api = inject(org.jellyfin.sdk.api.client.ApiClient.class);
@@ -357,6 +358,21 @@ public class ItemRowAdapter extends MutableObjectAdapter<Object> {
 
     public int getTotalItems() {
         return totalItems;
+    }
+
+    public String getGenreFilter() {
+        return mGenreFilter;
+    }
+
+    public void setGenreFilter(String genre) {
+        if (mGenreFilter != null && !mGenreFilter.equals(genre) || (mGenreFilter == null && genre != null)) {
+            mGenreFilter = genre;
+            if (mQuery != null) {
+                java.util.List<String> genreList = genre != null ? java.util.Collections.singletonList(genre) : null;
+                // new copy of the query with updated genres using the wacky dorky helper method
+                mQuery = ItemRowAdapterHelperKt.setItemsGenres(mQuery, genreList);
+            }
+        }
     }
 
     public void setSortBy(BrowseGridFragment.SortOption option) {

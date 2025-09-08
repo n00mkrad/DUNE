@@ -693,6 +693,19 @@ fun setItemsStartLetter(
 	nameStartsWith = startLetter,
 )
 
+/**
+ * Updates the genres filter in a GetItemsRequest
+ * @param request The original request
+ * @param genres The new genres to filter by, or null to clear the filter
+ * @return A new GetItemsRequest with the updated genres
+ */
+fun setItemsGenres(
+    request: GetItemsRequest,
+    genres: Collection<String>?
+) = request.copy(
+    genres = genres?.toList()
+)
+
 @JvmOverloads
 fun ItemRowAdapter.refreshItem(
 	api: ApiClient,

@@ -22,6 +22,7 @@
     <string name="state_disabled">Disabled</string>
     <string name="lbl_settings">Settings</string>
     <string name="lbl_home">Home</string>
+    <string name="lbl_masks">Masks</string>
     <string name="lbl_continue_watching">Continue watching</string>
     <string name="continue_listening">Continue listening</string>
     <string name="lbl_next_up">Next up</string>
@@ -31,6 +32,7 @@
     <string name="lbl_suggested">Suggested</string>
     <string name="lbl_status">%1$s / %2$s</string>
     <string name="lbl_genres">Genres</string>
+    <string name="lbl_filtered_by_genre">Filtered by genre: %1$s</string>
     <string name="genre_row_action_adventure">Action &amp; Adventure</string>
     <string name="show_action_adventure_row">Show Action &amp; Adventure row</string>
     <string name="genre_row_favorites">Favorites</string>
@@ -366,15 +368,12 @@
     <string name="login_username_field_empty">Username cannot be empty</string>
     <string name="lbl_manage_servers">Manage servers</string>
     <string name="lbl_remove_users">This will also remove all associated accounts</string>
-
-    <string name="lbl_backdrop_blur">Backdrop blur</string>
+    <string name="backdrop_settings">Backdrop Settings</string>
+    <string name="backdrop_settings_description">Configure background image display settings</string>
     <string name="lbl_backdrop_fading">Backdrop fading</string>
     <string name="lbl_backdrop_dimming">Backdrop Dimming</string>
-    <string name="backdrop_settings">Backdrop Settings</string>
-    <string name="panel_title">Navigation</string>
-    <string name="backdrop_settings_description">Customize backdrop appearance and behavior</string>
     <string name="pref_show_backdrop_description">Show backdrop images in the background of the app</string>
-    <string name="pref_backdrop_blur_description" formatted="false">Control the blur effect of backdrop images from 0% (no blur) to 100% (full blur)</string>
+
     <string name="lbl_remove_user_content">Remove account</string>
     <string name="lbl_sign_out_content">Requires login on next use</string>
     <string name="lbl_remove_server">Remove server</string>
@@ -755,6 +754,8 @@
     <string name="pref_audio_language_none">(Default)</string>
 <string name="pref_subtitle_default_language">Default Subtitle Language</string>
     <string name="pref_subtitle_default_language_summary">Set the default language for subtitles</string>
+    <string name="pref_subtitle_default_secondary_language">Secondary Subtitle Language</string>
+    <string name="pref_subtitle_default_secondary_language_description">Fallback language when the primary is not available</string>
     <string name="pref_subtitle_language_none">None (Disabled)</string>
     <string name="pref_subtitle_language_ara">العربية (Arabic)</string>
     <string name="pref_subtitle_language_zho">中文 (Chinese)</string>
