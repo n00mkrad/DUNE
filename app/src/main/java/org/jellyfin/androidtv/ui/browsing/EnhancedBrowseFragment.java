@@ -179,6 +179,13 @@ public class EnhancedBrowseFragment extends Fragment implements RowLoader, View.
         }
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mClickedListener.removeListeners();
+        mSelectedListener.removeListeners();
+    }
+
     protected void setupQueries(RowLoader rowLoader) {
         rowLoader.loadRows(mRows);
     }
