@@ -73,10 +73,14 @@ public class CardPresenter extends Presenter {
     class ViewHolder extends Presenter.ViewHolder {
         private int cardWidth = 104; // 115 * 0.9
         private int cardHeight = 126; // 140 * 0.9
+        
+        private double aspect;
+        private boolean isUserView = false;
 
         private BaseRowItem mItem;
         private LegacyImageCardView mCardView;
         private Drawable mDefaultCardImage;
+        public boolean focusListenerSet = false;
 
         public ViewHolder(View view) {
             super(view);
@@ -356,116 +360,158 @@ public class CardPresenter extends Presenter {
         BaseRowItem rowItem = (BaseRowItem) item;
 
         ViewHolder holder = (ViewHolder) viewHolder;
+        
+        // Initialize holder fields from presenter
+        holder.aspect = aspect;
+        holder.isUserView = isUserView;
+        
+        // Set basic card properties first
         holder.setItem(rowItem, mImageType, 130, 150, mStaticHeight);
 
         if (holder.mCardView != null) {
+            // Set focus properties once
             holder.mCardView.setFocusable(true);
             holder.mCardView.setFocusableInTouchMode(true);
-            // Remove elevation and shadow effects but keep the white border on focus
             holder.mCardView.setElevation(0);
             holder.mCardView.setSelected(false);
-            // Set up focus handling with minimal elevation and white border
-            holder.mCardView.setFocusable(true);
-            holder.mCardView.setFocusableInTouchMode(true);
-            holder.mCardView.setSelected(false);
 
-            // Set minimum possible elevation (0.1dp)
-            final float minElevation = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                0.1f,
-                holder.mCardView.getContext().getResources().getDisplayMetrics()
-            );
+            // Set text content
+            holder.mCardView.setTitleText(rowItem.getCardName(holder.mCardView.getContext()));
+            holder.mCardView.setContentText(rowItem.getSubText(holder.mCardView.getContext()));
+            
+            // Set basic indicators
+            holder.mCardView.showFavIcon(rowItem.isFavorite());
+            if (rowItem instanceof AudioQueueBaseRowItem && ((AudioQueueBaseRowItem) rowItem).getPlaying()) {
+                holder.mCardView.setPlayingIndicator(true);
+            } else {
+                holder.mCardView.setPlayingIndicator(false);
+            }
 
-            // Set up a focus change listener to handle the border and elevation
-            holder.mCardView.setOnFocusChangeListener((v, hasFocus) -> {
-                v.setSelected(hasFocus);
+            // Set overlay info for posters
+            if (ImageType.POSTER.equals(mImageType)) {
+                holder.mCardView.setOverlayInfo(rowItem);
+            }
+            
+            // Set up optimized focus handling only once per view holder
+            setupFocusHandling(holder);
 
-                // Apply minimal elevation when focused
+            // Lazy load rating and badge information
+            loadRatingAndBadgeAsync(holder, rowItem);
+
+            // Lazy load image
+            loadImageAsync(holder, rowItem);
+        }
+    }
+    
+    private void setupFocusHandling(ViewHolder holder) {
+        // Only set up focus handling once per view holder to avoid duplicate listeners
+        if (holder.focusListenerSet) {
+            return;
+        }
+        
+        // Set minimal elevation for focus effects
+        final float minElevation = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            0.1f,
+            holder.mCardView.getContext().getResources().getDisplayMetrics()
+        );
+
+        // Set up a lightweight focus change listener
+        holder.mCardView.setOnFocusChangeListener((v, hasFocus) -> {
+            v.setSelected(hasFocus);
+
+            // Apply minimal elevation when focused
+            if (hasFocus) {
+                v.setElevation(minElevation);
+                v.setTranslationZ(minElevation);
+            } else {
+                v.setElevation(0);
+                v.setTranslationZ(0);
+            }
+
+            // Set border drawable with API level check
+            View mainImage = v.findViewById(R.id.main_image);
+            if (mainImage != null) {
                 if (hasFocus) {
-                    v.setElevation(minElevation);
-                    v.setTranslationZ(minElevation);
-                } else {
-                    v.setElevation(0);
-                    v.setTranslationZ(0);
-                }
-
-                // Manually set the foreground drawable for the border with API level check
-                View mainImage = v.findViewById(R.id.main_image);
-                if (mainImage != null) {
-                    if (hasFocus) {
-                        // Get the border drawable from resources
-                        Drawable border = ContextCompat.getDrawable(
-                            v.getContext(),
-                            R.drawable.card_focused_border
-                        );
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                            mainImage.setForeground(border);
-                        } else {
-                            // For API < 23, set the background instead (with padding to avoid covering content)
-                            mainImage.setBackground(border);
-                        }
+                    Drawable border = ContextCompat.getDrawable(
+                        v.getContext(),
+                        R.drawable.card_focused_border
+                    );
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        mainImage.setForeground(border);
                     } else {
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                            mainImage.setForeground(null);
-                        } else {
-                            mainImage.setBackground(null);
-                        }
+                        mainImage.setBackground(border);
+                    }
+                } else {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        mainImage.setForeground(null);
+                    } else {
+                        mainImage.setBackground(null);
                     }
                 }
-            });
-        }
-
-        holder.mCardView.setTitleText(rowItem.getCardName(holder.mCardView.getContext()));
-        holder.mCardView.setContentText(rowItem.getSubText(holder.mCardView.getContext()));
-        if (ImageType.POSTER.equals(mImageType)) {
-            holder.mCardView.setOverlayInfo(rowItem);
-        }
-        holder.mCardView.showFavIcon(rowItem.isFavorite());
-        if (rowItem instanceof AudioQueueBaseRowItem && ((AudioQueueBaseRowItem) rowItem).getPlaying()) {
-            holder.mCardView.setPlayingIndicator(true);
-        } else {
-            holder.mCardView.setPlayingIndicator(false);
-
-            if (rowItem.getBaseItem() != null && rowItem.getBaseItem().getType() != BaseItemKind.USER_VIEW) {
-                RatingType ratingType = KoinJavaComponent.<UserPreferences>get(UserPreferences.class).get(UserPreferences.Companion.getDefaultRatingType());
-                if (ratingType == RatingType.RATING_TOMATOES) {
+            }
+        });
+        
+        holder.focusListenerSet = true;
+    }
+    
+    private void loadRatingAndBadgeAsync(ViewHolder holder, BaseRowItem rowItem) {
+        // Use a lightweight approach for rating and badge loading
+        if (rowItem.getBaseItem() != null && rowItem.getBaseItem().getType() != BaseItemKind.USER_VIEW) {
+            RatingType ratingType = KoinJavaComponent.<UserPreferences>get(UserPreferences.class).get(UserPreferences.Companion.getDefaultRatingType());
+            
+            if (ratingType == RatingType.RATING_TOMATOES) {
+                // Load badge asynchronously
+                holder.mCardView.post(() -> {
                     Drawable badge = rowItem.getBadgeImage(holder.view.getContext(), imageHelper.getValue());
-                    holder.mCardView.setRating(null);
                     if (badge != null) {
                         holder.mCardView.setBadgeImage(badge);
                     }
-                } else if (ratingType == RatingType.RATING_STARS &&
-                        rowItem.getBaseItem().getCommunityRating() != null) {
-                    holder.mCardView.setBadgeImage(ContextCompat.getDrawable(viewHolder.view.getContext(), R.drawable.ic_star));
+                });
+            } else if (ratingType == RatingType.RATING_STARS && 
+                       rowItem.getBaseItem().getCommunityRating() != null) {
+                // Set star badge and rating
+                holder.mCardView.post(() -> {
+                    holder.mCardView.setBadgeImage(ContextCompat.getDrawable(holder.view.getContext(), R.drawable.ic_star));
                     holder.mCardView.setRating(String.format(Locale.US, "%.1f", rowItem.getBaseItem().getCommunityRating()));
-                }
+                });
             }
         }
-
-        JellyfinImage image = null;
-        if (rowItem.getBaseItem() != null) {
-            if (aspect == ImageHelper.ASPECT_RATIO_BANNER) {
-                image = JellyfinImageKt.getItemImages(rowItem.getBaseItem()).get(org.jellyfin.sdk.model.api.ImageType.BANNER);
-            } else if (aspect == ImageHelper.ASPECT_RATIO_2_3 && rowItem.getBaseItem().getType() == BaseItemKind.EPISODE && rowItem instanceof BaseItemDtoBaseRowItem && ((BaseItemDtoBaseRowItem) rowItem).getPreferSeriesPoster()) {
-                image = JellyfinImageKt.getSeriesPrimaryImage(rowItem.getBaseItem());
-            } else if (aspect == ImageHelper.ASPECT_RATIO_16_9 && !isUserView && (rowItem.getBaseItem().getType() != BaseItemKind.EPISODE || !rowItem.getBaseItem().getImageTags().containsKey(org.jellyfin.sdk.model.api.ImageType.PRIMARY) || (rowItem.getPreferParentThumb() && rowItem.getBaseItem().getParentThumbImageTag() != null))) {
-                if (rowItem.getPreferParentThumb() || !rowItem.getBaseItem().getImageTags().containsKey(org.jellyfin.sdk.model.api.ImageType.PRIMARY)) {
-                    image = JellyfinImageKt.getParentImages(rowItem.getBaseItem()).get(org.jellyfin.sdk.model.api.ImageType.THUMB);
-                } else {
-                    image = JellyfinImageKt.getItemImages(rowItem.getBaseItem()).get(org.jellyfin.sdk.model.api.ImageType.THUMB);
+    }
+    
+    private void loadImageAsync(ViewHolder holder, BaseRowItem rowItem) {
+        // Post image loading to avoid blocking the main thread
+        holder.mCardView.post(() -> {
+            try {
+                JellyfinImage image = null;
+                if (rowItem.getBaseItem() != null) {
+                    if (holder.aspect == ImageHelper.ASPECT_RATIO_BANNER) {
+                        image = JellyfinImageKt.getItemImages(rowItem.getBaseItem()).get(org.jellyfin.sdk.model.api.ImageType.BANNER);
+                    } else if (holder.aspect == ImageHelper.ASPECT_RATIO_2_3 && rowItem.getBaseItem().getType() == BaseItemKind.EPISODE && rowItem instanceof BaseItemDtoBaseRowItem && ((BaseItemDtoBaseRowItem) rowItem).getPreferSeriesPoster()) {
+                        image = JellyfinImageKt.getSeriesPrimaryImage(rowItem.getBaseItem());
+                    } else if (holder.aspect == ImageHelper.ASPECT_RATIO_16_9 && !holder.isUserView && (rowItem.getBaseItem().getType() != BaseItemKind.EPISODE || !rowItem.getBaseItem().getImageTags().containsKey(org.jellyfin.sdk.model.api.ImageType.PRIMARY) || (rowItem.getPreferParentThumb() && rowItem.getBaseItem().getParentThumbImageTag() != null))) {
+                        if (rowItem.getPreferParentThumb() || !rowItem.getBaseItem().getImageTags().containsKey(org.jellyfin.sdk.model.api.ImageType.PRIMARY)) {
+                            image = JellyfinImageKt.getParentImages(rowItem.getBaseItem()).get(org.jellyfin.sdk.model.api.ImageType.THUMB);
+                        } else {
+                            image = JellyfinImageKt.getItemImages(rowItem.getBaseItem()).get(org.jellyfin.sdk.model.api.ImageType.THUMB);
+                        }
+                    } else {
+                        image = JellyfinImageKt.getItemImages(rowItem.getBaseItem()).get(org.jellyfin.sdk.model.api.ImageType.PRIMARY);
+                    }
                 }
-            } else {
-                image = JellyfinImageKt.getItemImages(rowItem.getBaseItem()).get(org.jellyfin.sdk.model.api.ImageType.PRIMARY);
+
+                int fillWidth = Math.round(holder.getCardWidth() * holder.mCardView.getResources().getDisplayMetrics().density);
+                int fillHeight = Math.round(holder.getCardHeight() * holder.mCardView.getResources().getDisplayMetrics().density);
+
+                holder.updateCardViewImage(
+                    image == null ? rowItem.getImageUrl(holder.mCardView.getContext(), imageHelper.getValue(), mImageType, fillWidth, fillHeight) : imageHelper.getValue().getImageUrl(image),
+                    image == null ? null : image.getBlurHash()
+                );
+            } catch (Exception e) {
+                // Log error but don't crash
+                android.util.Log.e("CardPresenter", "Error loading image", e);
             }
-        }
-
-        int fillWidth = Math.round(holder.getCardWidth() * holder.mCardView.getResources().getDisplayMetrics().density);
-        int fillHeight = Math.round(holder.getCardHeight() * holder.mCardView.getResources().getDisplayMetrics().density);
-
-        holder.updateCardViewImage(
-                image == null ? rowItem.getImageUrl(holder.mCardView.getContext(), imageHelper.getValue(), mImageType, fillWidth, fillHeight) : imageHelper.getValue().getImageUrl(image),
-                image == null ? null : image.getBlurHash()
-        );
+        });
     }
 
     @Override
