@@ -838,6 +838,8 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
         mSortButton.setContentDescription(getString(R.string.lbl_sort_by));
 
         binding.toolBar.addView(mSortButton);
+
+        // Add masks button for genre filtering
         mMasksButton = new ImageButton(requireContext(), null, 0, R.style.Button_Icon);
         mMasksButton.setImageResource(R.drawable.ic_masks);
         mMasksButton.setMaxHeight(size);
@@ -849,23 +851,27 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
 
                 // genre options
                 String[] genres = {
-                    "Action", "Adventure", "Animation", "Anime","Comedy",
-                    "Crime", "Documentary", "Drama", "Family", "Fantasy",
-                    "History", "Horror", "Music", "Mystery", "Romance",
-                    "Science Fiction", "Thriller", "War", "Western", "TV Movie"
+                        "Action", "Adventure", "Animation", "Anime","Comedy",
+                        "Crime", "Documentary", "Drama", "Family", "Fantasy",
+                        "History", "Horror", "Music", "Mystery", "Romance",
+                        "Science Fiction", "Thriller", "War", "Western", "TV Movie"
                 };
 
+                // Make menu items checkable
                 genreMenu.getMenu().setGroupCheckable(0, true, true);
 
                 String currentGenre = mAdapter.getGenreFilter();
+                String normalizedCurrentGenre = currentGenre != null ? normalizeGenreName(currentGenre) : null;
 
                 MenuItem allGenresItem = genreMenu.getMenu().add(0, 0, 0, "All Genres");
-                allGenresItem.setChecked(currentGenre == null || currentGenre.isEmpty());
+                allGenresItem.setChecked(normalizedCurrentGenre == null);
 
                 for (int i = 0; i < genres.length; i++) {
                     MenuItem item = genreMenu.getMenu().add(0, i + 1, i + 1, genres[i]);
                     item.setCheckable(true);
-                    item.setChecked(genres[i].equals(currentGenre));
+                    // Use case-insensitive comparison with normalized names for better accuracy
+                    String normalizedGenre = normalizeGenreName(genres[i]);
+                    item.setChecked(normalizedGenre != null && normalizedGenre.equals(normalizedCurrentGenre));
                 }
 
                 // item click listener
@@ -874,7 +880,9 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
                     public boolean onMenuItemClick(MenuItem item) {
                         if (mAdapter != null) {
                             String selectedGenre = item.getItemId() == 0 ? null : item.getTitle().toString();
-                            mAdapter.setGenreFilter(selectedGenre);
+                            // Normalize the genre name for better server-side matching
+                            String normalizedGenre = selectedGenre != null ? normalizeGenreName(selectedGenre) : null;
+                            mAdapter.setGenreFilter(normalizedGenre);
                             mAdapter.Retrieve();
                             updateCounter(mAdapter.getTotalItems() > 0 ? 1 : 0);
 
@@ -883,13 +891,12 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
                                 MenuItem menuItem = genreMenu.getMenu().getItem(i);
                                 menuItem.setChecked(menuItem == item);
                             }
-
-                            setStatusText(mainTitle);
                         }
                         return true;
                     }
                 });
 
+                // Show the menu after setting up the listener
                 genreMenu.show();
             }
         });
@@ -973,6 +980,63 @@ public class BrowseGridFragment extends Fragment implements View.OnKeyListener {
         });
         mSettingsButton.setContentDescription(getString(R.string.lbl_settings));
         binding.toolBar.addView(mSettingsButton);
+    }
+
+    /**
+     * Normalizes genre names for better matching.
+     * Converts to lowercase, trims whitespace, and handles common variations.
+     */
+    private String normalizeGenreName(String genre) {
+        if (genre == null) return null;
+
+        String normalized = genre.trim().toLowerCase();
+
+        // Handle common genre variations
+        switch (normalized) {
+            case "sci-fi":
+            case "science fiction":
+                return "science fiction";
+            case "sci fi":
+                return "science fiction";
+            case "rom-com":
+            case "rom com":
+                return "romance";
+            case "martial arts":
+                return "action";
+            case "superhero":
+                return "action";
+            case "animated":
+                return "animation";
+            case "doc":
+            case "docu":
+                return "documentary";
+            default:
+                return normalized;
+        }
+    }
+
+    /**
+     * Gets the best matching genre from the hardcoded list for better compatibility.
+     */
+    private String getBestMatchingGenre(String serverGenre) {
+        if (serverGenre == null) return null;
+
+        String normalizedServer = normalizeGenreName(serverGenre);
+        String[] genres = {
+                "action", "adventure", "animation", "anime", "comedy",
+                "crime", "documentary", "drama", "family", "fantasy",
+                "history", "horror", "music", "mystery", "romance",
+                "science fiction", "thriller", "war", "western", "tv movie"
+        };
+
+        for (String genre : genres) {
+            if (genre.equals(normalizedServer)) {
+                return genre.substring(0, 1).toUpperCase() + genre.substring(1);
+            }
+        }
+
+        // If no exact match, return the original genre for dynamic handling
+        return serverGenre;
     }
 
     class JumplistPopup {
