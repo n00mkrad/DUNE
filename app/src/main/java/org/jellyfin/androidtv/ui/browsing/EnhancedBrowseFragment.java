@@ -168,7 +168,7 @@ public class EnhancedBrowseFragment extends Fragment implements RowLoader, View.
         // Clear the backdrop when the fragment is stopped
         clearBackdrop();
     }
-    
+
     private void clearBackdrop() {
         try {
             if (backgroundService.getValue() != null) {
@@ -184,11 +184,6 @@ public class EnhancedBrowseFragment extends Fragment implements RowLoader, View.
         super.onDestroyView();
         mClickedListener.removeListeners();
         mSelectedListener.removeListeners();
-        
-        // Clear the backdrop when the view is destroyed
-        if (backgroundService.getValue() != null) {
-            backgroundService.getValue().clearBackgrounds();
-        }
     }
 
     protected void setupQueries(RowLoader rowLoader) {
