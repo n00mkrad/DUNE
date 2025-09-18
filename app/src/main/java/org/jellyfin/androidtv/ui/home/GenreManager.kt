@@ -1,10 +1,14 @@
 package org.jellyfin.androidtv.ui.home
 
 import android.content.Context
+import androidx.leanback.widget.BaseCardView
+import androidx.leanback.widget.Presenter
 import androidx.leanback.widget.Row
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jellyfin.androidtv.auth.repository.UserRepository
+import org.jellyfin.androidtv.constant.ChangeTriggerType
+import org.jellyfin.androidtv.constant.ImageType
 import org.jellyfin.androidtv.data.repository.ItemRepository
 import org.jellyfin.androidtv.preference.UserPreferences
 import org.jellyfin.androidtv.preference.UserSettingPreferences
@@ -52,6 +56,12 @@ class GenreManager(
 	// Performance optimization: Lazy-loaded genre configurations
 	private val genreConfigs by lazy {
 		listOf(
+			GenreConfig(
+				name = "Collections",
+				displayName = "Collections",
+				preference = userSettingPreferences.showCollectionsRow,
+				loader = { createCollectionsRow() }
+			),
 			GenreConfig(
 				name = "Science Fiction",
 				displayName = "Sci-Fi",
@@ -281,14 +291,89 @@ class GenreManager(
 			userId = currentUserId,
 			includeItemTypes = setOf(BaseItemKind.PLAYLIST),
 			mediaTypes = setOf(MediaType.AUDIO),
-			sortBy = setOf(ItemSortBy.SORT_NAME),
+			sortBy = listOf(userPreferences[UserPreferences.genreSortBy].itemSortBy),
 			limit = GENRE_ITEM_LIMIT,
 			fields = ItemRepository.itemFields,
 			recursive = true,
 			excludeItemTypes = setOf(BaseItemKind.MOVIE, BaseItemKind.SERIES, BaseItemKind.EPISODE)
 		)
 
-		return HomeFragmentBrowseRowDefRow(BrowseRowDef("Music", musicPlaylistQuery, GENRE_ITEM_LIMIT))
+		return object : HomeFragmentRow {
+			override fun addToRowsAdapter(
+				context: Context,
+				cardPresenter: CardPresenter,
+				rowsAdapter: MutableObjectAdapter<Row>
+			) {
+				val noInfoCardPresenter = CardPresenter(false, GENRE_CARD_HEIGHT).apply {
+					setHomeScreen(true)
+					setUniformAspect(true)
+				}
+
+				HomeFragmentBrowseRowDefRow(BrowseRowDef("Music Playlists", musicPlaylistQuery, GENRE_ITEM_LIMIT, false, true))
+					.addToRowsAdapter(context, noInfoCardPresenter, rowsAdapter)
+			}
+		}
+	}
+
+	/**
+	 * Creates a Collections row with thumbnail images and same card size as Music Videos row
+	 */
+	private fun createCollectionsRow(): HomeFragmentRow {
+		val currentUserId = userRepository.currentUser.value?.id
+			?: throw IllegalStateException("User not available")
+
+		// Create a query to get collections
+		val query = GetItemsRequest(
+			userId = currentUserId,
+			includeItemTypes = listOf(BaseItemKind.BOX_SET),
+			sortBy = setOf(ItemSortBy.RANDOM),
+			sortOrder = listOf(SortOrder.DESCENDING),
+			limit = GENRE_ITEM_LIMIT,
+			recursive = true,
+			imageTypeLimit = 1,
+			enableTotalRecordCount = false,
+			fields = ItemRepository.itemFields,
+			enableImages = true
+		)
+
+		return object : HomeFragmentRow {
+			override fun addToRowsAdapter(
+				context: Context,
+				cardPresenter: CardPresenter,
+				rowsAdapter: MutableObjectAdapter<Row>
+			) {
+				// Create a card presenter for collections with thumbnail images and specific dimensions to match Music Videos row
+				val collectionsCardPresenter = object : CardPresenter(false, ImageType.THUMB, 165) {
+					init {
+						setHomeScreen(true)
+						setUniformAspect(true)
+					}
+
+					override fun onBindViewHolder(viewHolder: Presenter.ViewHolder, item: Any?) {
+						super.onBindViewHolder(viewHolder, item)
+
+						// Set fixed dimensions for all cards in the row (same as Music Videos)
+						(viewHolder.view as? org.jellyfin.androidtv.ui.card.LegacyImageCardView)?.let { cardView ->
+							cardView.setMainImageDimensions(220, 128)
+							cardView.cardType = BaseCardView.CARD_TYPE_INFO_UNDER
+						}
+					}
+				}
+
+				// Create the row definition with chunk size and change triggers
+				val rowDef = BrowseRowDef(
+					"Collections",
+					query,
+					10, // chunkSize
+					false, // preferParentThumb
+					true, // staticHeight
+					arrayOf(ChangeTriggerType.LibraryUpdated)
+				)
+
+				// Add the row to the adapter
+				HomeFragmentBrowseRowDefRow(rowDef).addToRowsAdapter(context, collectionsCardPresenter, rowsAdapter)
+			}
+		}
 	}
 
 	fun hasEnabledGenres(): Boolean {

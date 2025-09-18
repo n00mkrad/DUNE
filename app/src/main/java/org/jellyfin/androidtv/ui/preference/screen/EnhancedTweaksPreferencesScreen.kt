@@ -67,6 +67,12 @@ class EnhancedTweaksPreferencesScreen : OptionsFragment() {
                 bind(userSettingPreferences, userSettingPreferences.showMusicVideosRow)
             }
 
+            // Collections
+            checkbox {
+                setTitle(R.string.show_collections_row)
+                bind(userSettingPreferences, userSettingPreferences.showCollectionsRow)
+            }
+
             // Genre rows in specified order
             checkbox {
                 setTitle(R.string.show_sci_fi_row)
