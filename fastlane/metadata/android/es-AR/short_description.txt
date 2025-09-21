@@ -1,1 +1,0 @@
-Cliente para television de Jellyfin, el sistema multimedia gratuito
